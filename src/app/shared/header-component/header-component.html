@@ -1,7 +1,73 @@
-<!-- header -->
-<div class="mobile-menu" id="mobileMenu">
-  <a href="index.html">Início</a>
-  <a href="orcamento.html">Meus Orçamentos</a>
-  <a href="#">Mensagens</a>
-  <a href="orcamento.html" class="btn-cta-mobile">Orçamento</a>
-</div>
+<!--
+  HEADER COMPONENT — Hero com Carrossel
+  Fiel ao index.html modelo:
+  - Carrossel de 5 imagens com fade (opacity)
+  - Overlay gradiente diagonal
+  - Eyebrow + título h1 com <em> em itálico
+  - Subtítulo e 2 botões de ação
+  - Bolinhas indicadoras (dots) clicáveis
+  - Setas anterior/próximo
+  - Animação CSS heroIn ao carregar
+
+  Inputs configuráveis via @Input():
+  - titulo, subtitulo, eyebrow → texto dinâmico por página
+  - btnPrimarioLabel, btnPrimarioLink → botão principal
+  - btnGhostLabel, btnGhostLink → botão secundário
+  - slides → array de URLs de imagem
+  - exibirBotoes → false nas páginas internas que têm CTA próprio
+-->
+
+<!-- HERO PRINCIPAL -->
+<section class="hero">
+
+  <!-- CARROSSEL DE FUNDO -->
+  <div class="hero-carousel">
+    <div
+      *ngFor="let slide of slides; let i = index"
+      class="slide"
+      [class.active]="i === slideAtual"
+      [style.backgroundImage]="'url(' + slide + ')'"
+    ></div>
+  </div>
+
+  <!-- OVERLAY GRADIENTE DIAGONAL -->
+  <div class="hero-overlay"></div>
+
+  <!-- CONTEÚDO CENTRAL -->
+  <div class="hero-content">
+
+    <!-- Eyebrow — texto pequeno acima do título -->
+    <p class="hero-eyebrow" *ngIf="eyebrow">{{ eyebrow }}</p>
+
+    <!-- Título principal — suporta HTML via [innerHTML] para o <em> em itálico -->
+    <h1 class="hero-title" [innerHTML]="titulo"></h1>
+
+    <!-- Subtítulo descritivo -->
+    <p class="hero-subtitle" *ngIf="subtitulo">{{ subtitulo }}</p>
+
+    <!-- Botões de ação -->
+    <div class="hero-actions" *ngIf="exibirBotoes">
+      <a [routerLink]="btnPrimarioLink" class="btn-primary">{{ btnPrimarioLabel }}</a>
+      <a [href]="btnGhostLink" class="btn-ghost">{{ btnGhostLabel }}</a>
+    </div>
+
+  </div>
+
+  <!-- DOTS INDICADORES (bolinhas) -->
+  <div class="carousel-dots">
+    <button
+      *ngFor="let slide of slides; let i = index"
+      class="dot"
+      [class.active]="i === slideAtual"
+      (click)="irPara(i)"
+      [attr.aria-label]="'Ir para slide ' + (i + 1)"
+    ></button>
+  </div>
+
+  <!-- SETAS DE NAVEGAÇÃO -->
+  <div class="carousel-nav">
+    <button (click)="anterior()" aria-label="Slide anterior">&#8592;</button>
+    <button (click)="proximo()"  aria-label="Próximo slide">&#8594;</button>
+  </div>
+
+</section>

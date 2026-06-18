@@ -1,0 +1,358 @@
+/* ============================================================
+   LOGIN COMPONENT — CSS
+   Layout: Split-screen (imagem esquerda + formulário direita)
+   Design: High-end, minimalista, paleta branco/prata/preto
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --branco:       #ffffff;
+  --prata-claro:  #f0f0f0;
+  --prata:        #c0c0c0;
+  --cinza-claro:  #888888;
+  --cinza:        #444444;
+  --cinza-escuro: #1a1a1a;
+  --preto:        #0a0a0a;
+  --fonte-titulo: 'Cormorant Garamond', serif;
+  --fonte-corpo:  'DM Sans', sans-serif;
+  --transicao:    0.3s ease;
+}
+
+/* Reset */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--fonte-corpo);
+  background: var(--branco);
+  overflow-x: hidden;
+}
+
+/* ---- WRAPPER PRINCIPAL: Split-screen ---- */
+.fp-login-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   COLUNA ESQUERDA — Imagem Decorativa
+   ============================================================ */
+
+.fp-login-visual {
+  /* Ocupa 55% da largura — a direita ocupa 45% */
+  flex: 0 0 55%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 3rem;
+  /* Imagem de fundo de festa de luxo */
+  background-image: url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1600&q=80');
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+/* Overlay gradiente escuro sobre a imagem */
+.fp-login-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0,0,0,0.7) 0%,
+    rgba(0,0,0,0.4) 60%,
+    rgba(0,0,0,0.6) 100%
+  );
+}
+
+/* Conteúdo da coluna esquerda (logo + citação) */
+.fp-login-visual-content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 1rem 0;
+}
+
+/* Logo dentro da coluna visual */
+.fp-login-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--branco);
+  text-decoration: none;
+}
+
+.fp-logo-icon {
+  font-size: 1.4rem;
+  color: var(--prata);
+}
+
+.fp-logo-text {
+  font-family: var(--fonte-titulo);
+  font-size: 1.6rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--branco);
+}
+
+.fp-logo-text strong {
+  font-weight: 600;
+}
+
+/* Citação centralizada na coluna visual */
+.fp-login-quote {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.fp-quote-text {
+  font-family: var(--fonte-titulo);
+  font-size: 2rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--branco);
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+.fp-quote-sub {
+  font-family: var(--fonte-corpo);
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--prata);
+  margin: 0;
+}
+
+/* ============================================================
+   COLUNA DIREITA — Formulário de Login
+   ============================================================ */
+
+.fp-login-form-col {
+  flex: 1;                  /* Ocupa o espaço restante */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  background: var(--branco);
+}
+
+/* Caixa central do formulário */
+.fp-login-box {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Logo mobile */
+.fp-login-logo-mobile {
+  color: var(--preto);
+}
+
+/* ---- CABEÇALHO DO FORMULÁRIO ---- */
+
+.fp-eyebrow {
+  font-family: var(--fonte-corpo);
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--prata);
+  margin-bottom: 0.75rem;
+}
+
+.fp-login-title {
+  font-family: var(--fonte-titulo);
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: var(--preto);
+  margin-bottom: 0.5rem;
+}
+
+.fp-login-subtitle {
+  font-family: var(--fonte-corpo);
+  font-size: 0.85rem;
+  color: var(--cinza-claro);
+  line-height: 1.6;
+}
+
+/* ---- ALERTA DE ERRO ---- */
+
+.fp-alert-error {
+  background: #fff5f5;
+  border: 1px solid #ffcccc;
+  border-radius: 0;
+  color: #cc0000;
+  font-size: 0.85rem;
+  padding: 12px 16px;
+}
+
+.fp-alert-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* ---- CAMPOS DO FORMULÁRIO ---- */
+
+/* Label do campo */
+.fp-label {
+  font-family: var(--fonte-corpo);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cinza);
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Input padrão */
+.fp-input {
+  font-family: var(--fonte-corpo);
+  font-size: 0.9rem;
+  color: var(--preto);
+  background: var(--branco);
+  border: 1px solid var(--prata-claro);
+  border-radius: 0;              /* Remove arredondamento Bootstrap */
+  padding: 14px 16px;
+  transition: border-color var(--transicao), box-shadow var(--transicao);
+  width: 100%;
+}
+
+/* Estado de foco do input */
+.fp-input:focus {
+  border-color: var(--cinza);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+  outline: none;
+}
+
+/* Estado inválido (Bootstrap + customização) */
+.fp-input.is-invalid {
+  border-color: #cc0000;
+  background-image: none; /* Remove ícone padrão Bootstrap */
+}
+
+/* Mensagem de validação */
+.fp-validation-msg {
+  font-size: 0.78rem;
+  color: #cc0000;
+  margin-top: 6px;
+}
+
+/* Wrapper do campo senha (para posicionar o botão de mostrar) */
+.fp-input-wrapper {
+  position: relative;
+}
+
+/* Input senha tem padding direito para não sobrepor o botão */
+.fp-input-wrapper .fp-input {
+  padding-right: 48px;
+}
+
+/* Botão de alternar visibilidade da senha */
+.fp-toggle-senha {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--cinza-claro);
+  padding: 4px;
+  transition: color var(--transicao);
+  line-height: 1;
+}
+
+.fp-toggle-senha:hover {
+  color: var(--cinza);
+}
+
+/* Link "Esqueceu a senha" */
+.fp-link-esqueceu {
+  font-size: 0.75rem;
+  color: var(--cinza-claro);
+  text-decoration: none;
+  transition: color var(--transicao);
+}
+
+.fp-link-esqueceu:hover {
+  color: var(--preto);
+}
+
+/* ---- BOTÃO DE LOGIN ---- */
+
+.fp-btn-login {
+  background: var(--preto);
+  color: var(--branco);
+  border: none;
+  border-radius: 0;
+  font-family: var(--fonte-corpo);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 16px;
+  transition: all var(--transicao);
+  cursor: pointer;
+}
+
+.fp-btn-login:hover:not(:disabled) {
+  background: var(--cinza-escuro);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* Estado desabilitado durante o carregamento */
+.fp-btn-login:disabled {
+  background: var(--cinza-claro);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---- FOOTER DO FORMULÁRIO ---- */
+
+.fp-link-voltar {
+  font-family: var(--fonte-corpo);
+  font-size: 0.8rem;
+  color: var(--cinza-claro);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: color var(--transicao);
+}
+
+.fp-link-voltar:hover {
+  color: var(--preto);
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+
+/* Tablet (< 992px) — a coluna visual (d-none d-lg-flex) já some via Bootstrap */
+@media (max-width: 991px) {
+  .fp-login-form-col {
+    padding: 4rem 2rem;
+    min-height: 100vh;
+  }
+
+  .fp-login-box {
+    max-width: 460px;
+  }
+}
+
+/* Mobile (< 576px) */
+@media (max-width: 576px) {
+  .fp-login-form-col {
+    padding: 2.5rem 1.5rem;
+    align-items: flex-start;
+    padding-top: 4rem;
+  }
+
+  .fp-login-title {
+    font-size: 1.8rem;
+  }
+}

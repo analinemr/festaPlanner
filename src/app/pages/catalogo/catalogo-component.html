@@ -1,0 +1,197 @@
+<!--
+  CATÁLOGO COMPONENT — Página Pública de Produtos e Serviços
+  Layout: Grid de cards com filtro por categoria
+  Design: High-end, minimalista, paleta branco/prata/preto
+  Bootstrap 5 + CSS customizado (catalogo.component.css)
+  Integração: CatalogoService → GET /api/catalogo (Spring Boot)
+-->
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg fp-navbar fp-navbar-solid">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fp-logo" routerLink="/home">
+      <span class="fp-logo-icon">✦</span>
+      <span class="fp-logo-text">Festa<strong>Planner</strong></span>
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navCatalogo">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navCatalogo">
+      <ul class="navbar-nav ms-auto gap-3">
+        <li class="nav-item"><a class="nav-link fp-nav-link-dark" routerLink="/home">Início</a></li>
+        <li class="nav-item"><a class="nav-link fp-nav-link-dark active" routerLink="/catalogo">Catálogo</a></li>
+        <li class="nav-item"><a class="nav-link fp-nav-link-dark" routerLink="/orcamento">Orçamento</a></li>
+      </ul>
+      <a routerLink="/orcamento" class="btn fp-btn-cta-dark ms-4">Montar Orçamento</a>
+    </div>
+  </div>
+</nav>
+
+<!-- PÁGINA PRINCIPAL -->
+<div class="fp-catalogo-page">
+
+  <!-- HERO DA PÁGINA -->
+  <section class="fp-catalogo-hero">
+    <div class="fp-hero-overlay"></div>
+    <div class="fp-hero-content text-center">
+      <p class="fp-eyebrow">Nossa Oferta Completa</p>
+      <h1 class="fp-hero-title">Catálogo de <em>Serviços</em></h1>
+      <p class="fp-hero-subtitle">Tudo que seu evento precisa em um só lugar.</p>
+    </div>
+  </section>
+
+  <!-- CONTEÚDO PRINCIPAL: Filtros + Grid -->
+  <div class="container-fluid px-4 px-lg-5 py-5">
+
+    <!-- BARRA DE FILTROS -->
+    <div class="fp-filtros-wrapper mb-5">
+
+      <!-- Campo de busca por texto -->
+      <div class="fp-busca-wrapper">
+        <span class="fp-busca-icone">🔍</span>
+        <input
+          type="text"
+          class="fp-busca-input"
+          placeholder="Buscar produto ou serviço..."
+          [(ngModel)]="termoBusca"
+          (input)="filtrar()"
+        />
+      </div>
+
+      <!-- Filtros por categoria (botões pill) -->
+      <div class="fp-filtros-categorias">
+        <!-- "Todos" — reseta o filtro de categoria -->
+        <button
+          class="fp-filtro-btn"
+          [class.ativo]="categoriaSelecionada === ''"
+          (click)="selecionarCategoria('')"
+        >
+          Todos
+        </button>
+        <!-- *ngFor → itera sobre as categorias disponíveis -->
+        <button
+          *ngFor="let cat of categorias"
+          class="fp-filtro-btn"
+          [class.ativo]="categoriaSelecionada === cat.valor"
+          (click)="selecionarCategoria(cat.valor)"
+        >
+          {{ cat.icone }} {{ cat.nome }}
+        </button>
+      </div>
+
+      <!-- Controle de visualização: grid ou lista -->
+      <div class="fp-view-toggle">
+        <button
+          class="fp-view-btn"
+          [class.ativo]="visualizacao === 'grid'"
+          (click)="visualizacao = 'grid'"
+          title="Visualização em grade"
+        >⊞</button>
+        <button
+          class="fp-view-btn"
+          [class.ativo]="visualizacao === 'lista'"
+          (click)="visualizacao = 'lista'"
+          title="Visualização em lista"
+        >≡</button>
+      </div>
+
+    </div>
+    <!-- FIM FILTROS -->
+
+    <!-- LOADING -->
+    <div *ngIf="carregando" class="text-center py-5">
+      <div class="spinner-border" style="color: var(--prata);" role="status"></div>
+      <p class="mt-3" style="color: var(--cinza-claro); font-size: 0.85rem;">Carregando catálogo...</p>
+    </div>
+
+    <!-- RESULTADO VAZIO -->
+    <div *ngIf="!carregando && itensFiltrados.length === 0" class="fp-sem-resultado text-center py-5">
+      <p class="fp-sem-resultado-icone">🔍</p>
+      <h3 class="fp-sem-resultado-titulo">Nenhum item encontrado</h3>
+      <p class="fp-sem-resultado-texto">Tente buscar por outro termo ou categoria.</p>
+      <button class="btn fp-btn-limpar mt-3" (click)="limparFiltros()">Limpar Filtros</button>
+    </div>
+
+    <!-- CONTAGEM DE RESULTADOS -->
+    <div *ngIf="!carregando && itensFiltrados.length > 0" class="fp-contagem mb-4">
+      <span>{{ itensFiltrados.length }} {{ itensFiltrados.length === 1 ? 'item encontrado' : 'itens encontrados' }}</span>
+    </div>
+
+    <!-- GRID DE PRODUTOS -->
+    <div
+      *ngIf="!carregando && itensFiltrados.length > 0"
+      class="fp-catalogo-grid"
+      [class.fp-view-lista]="visualizacao === 'lista'"
+    >
+      <!-- *ngFor → itera sobre os itens filtrados -->
+      <div
+        *ngFor="let item of itensFiltrados"
+        class="fp-produto-card"
+        (click)="abrirDetalhe(item)"
+      >
+        <!-- Imagem com overlay de categoria -->
+        <div class="fp-produto-img" [style.backgroundImage]="'url(' + item.imagemUrl + ')'">
+          <!-- Badge de categoria sobre a imagem -->
+          <span class="fp-produto-cat-badge">{{ traduzirCategoria(item.categoria) }}</span>
+          <!-- Badge de item obrigatório -->
+          <span class="fp-produto-obrig-badge" *ngIf="item.obrigatorio">Incluso</span>
+        </div>
+
+        <!-- Informações do produto -->
+        <div class="fp-produto-info">
+          <h3 class="fp-produto-nome">{{ item.nome }}</h3>
+          <p class="fp-produto-desc">{{ item.descricao }}</p>
+          <div class="fp-produto-footer">
+            <span class="fp-produto-preco">{{ item.preco | currency:'BRL':'symbol':'1.2-2' }}</span>
+            <!-- Botão de adicionar ao orçamento -->
+            <a
+              [routerLink]="['/orcamento']"
+              class="fp-btn-add"
+              (click)="$event.stopPropagation()"
+            >
+              + Orçamento
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- FIM GRID -->
+
+    <!-- CTA FINAL -->
+    <div *ngIf="!carregando && itensFiltrados.length > 0" class="fp-cta-catalogo text-center mt-5 py-5">
+      <p class="fp-eyebrow">Pronto para planejar?</p>
+      <h2 class="fp-cta-titulo">Monte seu orçamento <em>agora</em></h2>
+      <p class="fp-cta-sub">Selecione os serviços e receba uma proposta completa em minutos.</p>
+      <a routerLink="/orcamento" class="btn fp-btn-primary-dark mt-4">Iniciar Orçamento →</a>
+    </div>
+
+  </div>
+  <!-- FIM CONTAINER -->
+
+</div>
+<!-- FIM PÁGINA -->
+
+<!-- MODAL DE DETALHE DO PRODUTO -->
+<!-- *ngIf → exibido somente quando itemDetalhe !== null -->
+<div class="fp-modal-overlay" *ngIf="itemDetalhe" (click)="fecharDetalhe()">
+  <!-- stopPropagation para não fechar ao clicar dentro do modal -->
+  <div class="fp-modal-box" (click)="$event.stopPropagation()">
+    <!-- Imagem do produto no modal -->
+    <div class="fp-modal-img" [style.backgroundImage]="'url(' + itemDetalhe!.imagemUrl + ')'">
+      <button class="fp-modal-close" (click)="fecharDetalhe()">×</button>
+    </div>
+    <!-- Conteúdo do modal -->
+    <div class="fp-modal-content">
+      <span class="fp-eyebrow">{{ traduzirCategoria(itemDetalhe!.categoria) }}</span>
+      <h2 class="fp-modal-titulo">{{ itemDetalhe!.nome }}</h2>
+      <p class="fp-modal-desc">{{ itemDetalhe!.descricao }}</p>
+      <div class="fp-modal-footer">
+        <span class="fp-modal-preco">{{ itemDetalhe!.preco | currency:'BRL':'symbol':'1.2-2' }}</span>
+        <a routerLink="/orcamento" class="btn fp-btn-primary-dark" (click)="fecharDetalhe()">
+          Incluir no Orçamento →
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,168 @@
+/* ============================================================
+   PEDIDOS COMPONENT — CSS
+   Layout: Sidebar admin + Tabela filtrada + Modal de detalhe
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --branco:#ffffff; --bg-conteudo:#f5f5f5; --bg-sidebar:#0f0f0f;
+  --prata-claro:#f0f0f0; --prata:#c0c0c0; --cinza-claro:#888888;
+  --cinza:#444444; --cinza-escuro:#1a1a1a; --preto:#0a0a0a;
+  --fonte-titulo:'Cormorant Garamond',serif; --fonte-corpo:'DM Sans',sans-serif;
+  --sidebar-width:240px; --sidebar-fechada:68px; --topbar-height:64px; --transicao:0.3s ease;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--fonte-corpo); background:var(--bg-conteudo); }
+
+/* ---- ESTRUTURA BASE (igual ao admin) ---- */
+.fp-adm-wrapper { display:flex; min-height:100vh; }
+.fp-sidebar { width:var(--sidebar-width); flex-shrink:0; background:var(--bg-sidebar); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:200; overflow:hidden; transition:width var(--transicao); }
+.fp-sidebar.fechada { width:var(--sidebar-fechada); }
+.fp-sidebar-brand { display:flex; align-items:center; gap:10px; padding:20px 18px; border-bottom:1px solid rgba(255,255,255,0.06); min-height:68px; overflow:hidden; white-space:nowrap; }
+.fp-logo-icon { font-size:1.3rem; color:var(--prata); flex-shrink:0; }
+.fp-logo-text { font-family:var(--fonte-titulo); font-size:1.3rem; font-weight:300; color:var(--branco); }
+.fp-logo-text strong { font-weight:600; }
+.fp-sidebar-nav { flex:1; padding:16px 0; overflow-y:auto; scrollbar-width:none; }
+.fp-nav-item { display:flex; align-items:center; gap:12px; width:100%; padding:12px 18px; background:none; border:none; color:rgba(255,255,255,0.55); font-family:var(--fonte-corpo); font-size:0.85rem; cursor:pointer; text-align:left; white-space:nowrap; transition:all var(--transicao); }
+.fp-nav-item:hover { background:rgba(255,255,255,0.06); color:var(--branco); }
+.fp-nav-item.ativo { background:rgba(255,255,255,0.1); color:var(--branco); border-left:2px solid var(--prata); }
+.fp-nav-icone { font-size:1.1rem; flex-shrink:0; } .fp-nav-nome { font-weight:400; }
+.fp-nav-badge { margin-left:auto; background:var(--prata); color:var(--preto); font-size:0.65rem; font-weight:600; padding:1px 7px; border-radius:10px; }
+.fp-sidebar-footer { padding:16px; border-top:1px solid rgba(255,255,255,0.06); }
+.fp-btn-logout { display:flex; align-items:center; gap:8px; background:none; border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.5); padding:8px 12px; font-size:0.8rem; cursor:pointer; width:100%; transition:all var(--transicao); }
+.fp-btn-logout:hover { border-color:rgba(255,255,255,0.3); color:var(--branco); }
+.fp-adm-content { flex:1; margin-left:var(--sidebar-width); display:flex; flex-direction:column; min-height:100vh; transition:margin-left var(--transicao); }
+.fp-sidebar.fechada ~ .fp-adm-content { margin-left:var(--sidebar-fechada); }
+.fp-topbar { position:sticky; top:0; z-index:100; height:var(--topbar-height); background:var(--branco); border-bottom:1px solid var(--prata-claro); display:flex; align-items:center; gap:16px; padding:0 32px; box-shadow:0 1px 8px rgba(0,0,0,0.04); }
+.fp-toggle-sidebar { background:none; border:none; font-size:1.2rem; color:var(--cinza); cursor:pointer; padding:6px; }
+.fp-topbar-titulo { font-family:var(--fonte-titulo); font-size:1.3rem; font-weight:300; color:var(--preto); flex:1; }
+
+/* ============================================================
+   CONTEÚDO DE PEDIDOS
+   ============================================================ */
+
+.fp-pedidos-body { padding:28px 32px; flex:1; animation:fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* Badge de novos pedidos na topbar */
+.fp-badge-novos { background:#e8f4fd; color:#1a6fa8; font-size:0.78rem; font-weight:500; padding:4px 12px; border:1px solid #b3d9f5; }
+
+/* ---- CARDS DE STATUS ---- */
+.fp-status-card {
+  background:var(--branco); border:1px solid var(--prata-claro);
+  padding:16px; display:flex; align-items:center; gap:14px;
+  cursor:pointer; transition:all var(--transicao);
+}
+.fp-status-card:hover { border-color:var(--prata); box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+.fp-status-card.ativo { border-color:var(--preto); border-width:2px; }
+.fp-status-card-icone { font-size:1.5rem; }
+.fp-status-card-num { font-family:var(--fonte-titulo); font-size:1.5rem; font-weight:300; color:var(--preto); margin:0; }
+.fp-status-card-label { font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--cinza-claro); margin:0; }
+
+/* ---- FILTROS AVANÇADOS ---- */
+.fp-filtros-avancados { display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px; background:var(--branco); border:1px solid var(--prata-claro); padding:14px 16px; }
+.fp-busca-wrapper { display:flex; align-items:center; gap:8px; border:1px solid var(--prata-claro); padding:8px 12px; background:var(--prata-claro); flex:1; min-width:200px; }
+.fp-busca-input { border:none; background:transparent; font-family:var(--fonte-corpo); font-size:0.85rem; color:var(--preto); outline:none; flex:1; }
+.fp-busca-input::placeholder { color:var(--cinza-claro); }
+.fp-filtro-data-group { display:flex; flex-direction:column; gap:4px; }
+.fp-label { font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--cinza-claro); font-weight:500; }
+.fp-input-sm { font-family:var(--fonte-corpo); font-size:0.82rem; border:1px solid var(--prata-claro); padding:7px 10px; color:var(--preto); background:var(--branco); outline:none; transition:border-color var(--transicao); }
+.fp-input-sm:focus { border-color:var(--cinza); }
+.fp-btn-limpar { background:none; border:1px solid var(--prata); color:var(--cinza-claro); font-size:0.78rem; padding:7px 14px; cursor:pointer; transition:all var(--transicao); align-self:flex-end; }
+.fp-btn-limpar:hover { border-color:var(--cinza); color:var(--preto); }
+
+/* ---- CARD / TABELA ---- */
+.fp-card { background:var(--branco); border:1px solid var(--prata-claro); overflow:hidden; }
+.fp-card-header { padding:14px 20px; border-bottom:1px solid var(--prata-claro); display:flex; align-items:center; justify-content:space-between; }
+.fp-card-titulo { font-size:0.82rem; color:var(--cinza-claro); margin:0; }
+.fp-card-info { font-size:0.78rem; color:var(--cinza); }
+.fp-table-wrapper { overflow-x:auto; }
+.fp-table { border-collapse:collapse; white-space:nowrap; }
+.fp-table th { font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--cinza-claro); font-weight:500; padding:12px 16px; border-bottom:1px solid var(--prata-claro); background:var(--prata-claro); text-align:left; }
+.fp-th-sortable { cursor:pointer; user-select:none; }
+.fp-th-sortable:hover { color:var(--preto); }
+.fp-sort-icon { font-size:0.7rem; margin-left:4px; }
+.fp-table td { padding:12px 16px; border-bottom:1px solid var(--prata-claro); font-size:0.85rem; color:var(--cinza-escuro); vertical-align:middle; }
+.fp-table-row { cursor:pointer; transition:background var(--transicao); }
+.fp-table-row:hover td { background:rgba(0,0,0,0.015); }
+.fp-table-row.nova td { background:#fffef5; }
+.fp-vazio-cell { text-align:center; color:var(--cinza-claro); font-size:0.85rem; padding:32px !important; }
+.fp-td-id { font-family:var(--fonte-titulo); color:var(--cinza-claro); }
+.fp-td-valor { font-weight:500; }
+.fp-cliente-cell { display:flex; align-items:center; gap:10px; }
+.fp-avatar { width:30px; height:30px; border-radius:50%; background:var(--prata-claro); display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:500; flex-shrink:0; }
+.fp-nome { font-size:0.85rem; font-weight:500; margin:0; }
+.fp-email { font-size:0.72rem; color:var(--cinza-claro); margin:0; }
+
+/* Badges de status */
+.fp-badge-status { display:inline-block; padding:3px 10px; font-size:0.7rem; letter-spacing:0.08em; text-transform:uppercase; font-weight:500; }
+.status-novo { background:#e8f4fd; color:#1a6fa8; }
+.status-em_analise { background:#fff8e1; color:#a07000; }
+.status-aprovado { background:#e8f5e9; color:#1a7a1a; }
+.status-cancelado { background:#fce4e4; color:#cc0000; }
+.status-pendente { background:#f5f5f5; color:var(--cinza); }
+
+/* Botões de ação na tabela */
+.fp-acoes-cell { display:flex; gap:4px; }
+.fp-btn-acao { background:none; border:1px solid var(--prata-claro); padding:4px 8px; cursor:pointer; font-size:0.85rem; transition:all var(--transicao); }
+.fp-btn-acao:hover { background:var(--prata-claro); }
+.fp-btn-analisar { border-color:#b3d9f5; }
+.fp-btn-analisar:hover { background:#e8f4fd; }
+.fp-btn-aprovar { border-color:#c8e6c9; }
+.fp-btn-aprovar:hover { background:#e8f5e9; }
+.fp-btn-cancelar-ped { border-color:#ffcdd2; }
+.fp-btn-cancelar-ped:hover { background:#fce4e4; }
+
+/* ============================================================
+   MODAL DE DETALHE
+   ============================================================ */
+.fp-modal-overlay { position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,0.55); display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(4px); animation:fadeIn 0.2s ease; }
+.fp-modal-pedido { background:var(--branco); max-width:720px; width:100%; max-height:90vh; overflow-y:auto; animation:slideUp 0.3s ease; }
+@keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+
+.fp-modal-header { display:flex; align-items:flex-start; justify-content:space-between; padding:24px 28px; border-bottom:1px solid var(--prata-claro); }
+.fp-eyebrow { font-size:0.7rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--prata); margin-bottom:4px; }
+.fp-modal-titulo { font-family:var(--fonte-titulo); font-size:1.8rem; font-weight:300; margin:0; }
+.fp-modal-close { background:none; border:none; font-size:1.8rem; cursor:pointer; color:var(--cinza-claro); padding:0 4px; line-height:1; }
+.fp-modal-close:hover { color:var(--preto); }
+
+.fp-modal-body { display:flex; gap:24px; padding:24px 28px; }
+.fp-modal-col { flex:1; display:flex; flex-direction:column; gap:20px; }
+.fp-modal-col-lateral { width:200px; flex-shrink:0; display:flex; flex-direction:column; }
+
+.fp-modal-secao { border:1px solid var(--prata-claro); padding:16px; }
+.fp-modal-info-grid { display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+.fp-info-item { display:flex; flex-direction:column; gap:2px; }
+.fp-info-label { font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--cinza-claro); }
+.fp-info-valor { font-size:0.88rem; color:var(--preto); }
+
+.fp-modal-valor-box { border:1px solid var(--prata-claro); padding:16px; margin-bottom:16px; text-align:center; }
+.fp-modal-valor-num { font-family:var(--fonte-titulo); font-size:1.8rem; font-weight:300; margin:8px 0 0; color:var(--preto); }
+
+.fp-modal-acoes { display:flex; flex-direction:column; gap:0; }
+.fp-btn-modal-acao { border-radius:0; font-size:0.78rem; font-weight:500; letter-spacing:0.06em; text-align:left; padding:10px 14px; transition:all var(--transicao); border:none; }
+.fp-btn-analisar-modal { background:#e8f4fd; color:#1a6fa8; }
+.fp-btn-analisar-modal:hover:not(:disabled) { background:#b3d9f5; }
+.fp-btn-aprovar-modal { background:#e8f5e9; color:#1a7a1a; }
+.fp-btn-aprovar-modal:hover:not(:disabled) { background:#c8e6c9; }
+.fp-btn-cancelar-modal { background:#fce4e4; color:#cc0000; }
+.fp-btn-cancelar-modal:hover:not(:disabled) { background:#ffcdd2; }
+.fp-btn-modal-acao:disabled { opacity:0.5; cursor:not-allowed; }
+
+.fp-btn-whatsapp { background:#25D366; color:var(--branco) !important; border:none; border-radius:0; font-size:0.78rem; font-weight:500; padding:10px 14px; text-decoration:none; display:block; text-align:center; transition:all var(--transicao); }
+.fp-btn-whatsapp:hover { background:#1ea855; }
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+@media (max-width:1024px) {
+  .fp-sidebar { width:var(--sidebar-fechada); }
+  .fp-adm-content { margin-left:var(--sidebar-fechada); }
+  .fp-nav-nome, .fp-nav-badge, .fp-logo-text { display:none; }
+}
+@media (max-width:768px) {
+  .fp-pedidos-body { padding:16px; }
+  .fp-modal-body { flex-direction:column; }
+  .fp-modal-col-lateral { width:100%; }
+}

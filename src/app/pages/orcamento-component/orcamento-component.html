@@ -1,0 +1,413 @@
+<!--
+  ORÇAMENTO COMPONENT — Montagem de Orçamento
+  Layout: Split-screen — Painel de seleção (esquerda) + Aside flutuante (direita)
+  Design: High-end, GlassMorphism no aside, carrosséis por categoria
+  Bootstrap 5 + CSS customizado (orcamento-component.css)
+  Integração: Dados de itens via CatalogoService (Spring Boot)
+-->
+
+<!-- NAVEGAÇÃO — mesma navbar da home, sem transparência -->
+<nav class="navbar navbar-expand-lg fp-navbar fp-navbar-solid">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fp-logo" routerLink="/home">
+      <span class="fp-logo-icon">✦</span>
+      <span class="fp-logo-text">Festa<strong>Planner</strong></span>
+    </a>
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item"><a class="nav-link fp-nav-link-dark" routerLink="/home">Início</a></li>
+      <li class="nav-item"><a class="nav-link fp-nav-link-dark" routerLink="/catalogo">Catálogo</a></li>
+    </ul>
+    <a routerLink="/login" class="btn fp-btn-cta-dark ms-3">Área Admin</a>
+  </div>
+</nav>
+
+<!-- LAYOUT SPLIT-SCREEN PRINCIPAL -->
+<div class="fp-app-layout">
+
+  <!-- ================================================
+       PAINEL ESQUERDO: Seleção de Itens
+       ================================================ -->
+  <main class="fp-selection-panel">
+
+    <!-- BARRA DE PROGRESSO DO WIZARD em 4 etapas -->
+    <div class="fp-progress-bar-wrapper">
+      <div class="fp-progress-steps">
+        <!-- *ngFor → itera sobre as etapas do wizard -->
+        <div
+          *ngFor="let etapa of etapasWizard; let i = index"
+          class="fp-progress-step"
+          [class.ativo]="i === etapaAtual"
+          [class.concluido]="i < etapaAtual"
+        >
+          <!-- Círculo numerado da etapa -->
+          <div class="fp-step-circle">
+            <!-- Ícone de check se concluído, número se não -->
+            <span *ngIf="i < etapaAtual">✓</span>
+            <span *ngIf="i >= etapaAtual">{{ i + 1 }}</span>
+          </div>
+          <!-- Label da etapa -->
+          <span class="fp-step-label">{{ etapa }}</span>
+        </div>
+      </div>
+      <!-- Linha de progresso preenchida conforme avanço -->
+      <div class="fp-progress-line">
+        <!-- Largura calculada proporcionalmente ao avanço -->
+        <div
+          class="fp-progress-fill"
+          [style.width.%]="(etapaAtual / (etapasWizard.length - 1)) * 100"
+        ></div>
+      </div>
+    </div>
+    <!-- FIM Barra de Progresso -->
+
+
+    <!-- ================================================
+         ETAPA 0: DADOS DO EVENTO
+         *ngIf → exibe somente quando etapaAtual === 0
+         ================================================ -->
+    <div class="fp-step-content" *ngIf="etapaAtual === 0">
+
+      <div class="fp-section-header mb-5">
+        <p class="fp-eyebrow">Etapa 1 de 4</p>
+        <h2 class="fp-step-title">Dados do <em>Evento</em></h2>
+        <p class="fp-step-subtitle">Conte-nos sobre a celebração que você está planejando.</p>
+      </div>
+
+      <!-- Formulário reativo para os dados do evento -->
+      <form [formGroup]="dadosEventoForm" class="fp-evento-form">
+
+        <!-- Tipo do evento — Radio buttons como cards visuais -->
+        <div class="mb-5">
+          <label class="fp-label mb-3">Tipo de Evento</label>
+          <div class="row g-3">
+            <!-- *ngFor → itera sobre os tipos de evento disponíveis -->
+            <div *ngFor="let tipo of tiposEvento" class="col-6 col-md-4">
+              <!-- Card selecionável via radio button -->
+              <label class="fp-radio-card" [class.selecionado]="dadosEventoForm.get('tipoEvento')?.value === tipo.valor">
+                <!-- Input radio oculto — vinculado ao FormControl -->
+                <input
+                  type="radio"
+                  formControlName="tipoEvento"
+                  [value]="tipo.valor"
+                  class="visually-hidden"
+                />
+                <span class="fp-radio-icon">{{ tipo.icone }}</span>
+                <span class="fp-radio-label">{{ tipo.nome }}</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid de campos do formulário -->
+        <div class="row g-4">
+
+          <!-- Nome do cliente -->
+          <div class="col-12 col-md-6">
+            <label class="fp-label">Seu Nome Completo</label>
+            <input type="text" class="fp-input form-control" formControlName="nomeCliente" placeholder="Ana Silva" [class.is-invalid]="campoInvalido(dadosEventoForm, 'nomeCliente')" />
+            <div class="invalid-feedback" *ngIf="campoInvalido(dadosEventoForm, 'nomeCliente')">Nome é obrigatório.</div>
+          </div>
+
+          <!-- E-mail -->
+          <div class="col-12 col-md-6">
+            <label class="fp-label">E-mail</label>
+            <input type="email" class="fp-input form-control" formControlName="emailCliente" placeholder="ana@email.com" [class.is-invalid]="campoInvalido(dadosEventoForm, 'emailCliente')" />
+            <div class="invalid-feedback" *ngIf="campoInvalido(dadosEventoForm, 'emailCliente')">Informe um e-mail válido.</div>
+          </div>
+
+          <!-- Telefone -->
+          <div class="col-12 col-md-6">
+            <label class="fp-label">WhatsApp / Telefone</label>
+            <input type="tel" class="fp-input form-control" formControlName="telefoneCliente" placeholder="(21) 99999-9999" />
+          </div>
+
+          <!-- Data do evento -->
+          <div class="col-12 col-md-6">
+            <label class="fp-label">Data Desejada</label>
+            <input type="date" class="fp-input form-control" formControlName="dataEvento" [min]="dataMinima" [class.is-invalid]="campoInvalido(dadosEventoForm, 'dataEvento')" />
+            <div class="invalid-feedback" *ngIf="campoInvalido(dadosEventoForm, 'dataEvento')">Selecione uma data futura.</div>
+          </div>
+
+          <!-- Número de convidados -->
+          <div class="col-12 col-md-6">
+            <label class="fp-label">Número de Convidados</label>
+            <input type="number" class="fp-input form-control" formControlName="numeroConvidados" placeholder="150" min="10" max="1000" />
+          </div>
+
+          <!-- Observações -->
+          <div class="col-12">
+            <label class="fp-label">Observações (opcional)</label>
+            <textarea class="fp-input form-control fp-textarea" formControlName="observacoes" placeholder="Conte mais sobre suas preferências..." rows="3"></textarea>
+          </div>
+
+        </div>
+
+        <!-- Botão avançar -->
+        <div class="fp-step-actions mt-5">
+          <button type="button" class="btn fp-btn-avancar" (click)="avancarEtapa()" [disabled]="dadosEventoForm.invalid">
+            Próximo: Escolher Serviços →
+          </button>
+        </div>
+
+      </form>
+    </div>
+    <!-- FIM ETAPA 0 -->
+
+
+    <!-- ================================================
+         ETAPA 1: SELEÇÃO DE ITENS (Carrosséis por Categoria)
+         ================================================ -->
+    <div class="fp-step-content" *ngIf="etapaAtual === 1">
+
+      <div class="fp-section-header mb-5">
+        <p class="fp-eyebrow">Etapa 2 de 4</p>
+        <h2 class="fp-step-title">Monte seu <em>Pacote</em></h2>
+        <p class="fp-step-subtitle">Selecione os serviços e produtos para seu evento.</p>
+      </div>
+
+      <!-- Loading enquanto carrega do Spring Boot -->
+      <div *ngIf="carregandoItens" class="text-center py-5">
+        <div class="spinner-border" role="status" style="color: var(--prata)"></div>
+        <p class="mt-3 fp-step-subtitle">Carregando catálogo...</p>
+      </div>
+
+      <!-- CATEGORIAS COM CARROSSÉIS -->
+      <div *ngIf="!carregandoItens">
+        <div *ngFor="let categoria of categoriasFiltradas" class="fp-categoria-section mb-5">
+
+          <!-- Cabeçalho da categoria -->
+          <div class="fp-categoria-header d-flex align-items-center gap-3 mb-3">
+            <span class="fp-categoria-icone">{{ categoria.icone }}</span>
+            <div>
+              <h3 class="fp-categoria-titulo">{{ categoria.nome }}</h3>
+              <!-- Destaque para itens obrigatórios -->
+              <span class="fp-badge-obrigatorio" *ngIf="categoria.obrigatorio">Obrigatório</span>
+            </div>
+          </div>
+
+          <!-- CARROSSEL HORIZONTAL DA CATEGORIA -->
+          <div class="fp-itens-track-wrapper position-relative">
+
+            <button class="fp-carousel-btn-sm fp-btn-sm-left" (click)="scrollCategoria(categoria.id, -1)">‹</button>
+
+            <!-- Track com scroll horizontal -->
+            <!-- [id] dinâmico para referenciar no scroll via JS -->
+            <div class="fp-itens-track" [id]="'track-' + categoria.id">
+
+              <!-- Card de cada item do catálogo -->
+              <!-- *ngFor → itera sobre os itens da categoria -->
+              <div
+                *ngFor="let item of categoria.itens"
+                class="fp-item-card"
+                [class.selecionado]="itemSelecionado(item.id!)"
+                [class.obrigatorio]="item.obrigatorio"
+                (click)="toggleItem(item)"
+              >
+                <!-- Imagem do item vinda do Spring Boot -->
+                <div class="fp-item-img" [style.backgroundImage]="'url(' + item.imagemUrl + ')'">
+                  <!-- Overlay de seleção -->
+                  <div class="fp-item-overlay" *ngIf="itemSelecionado(item.id!)">
+                    <span class="fp-check-icon">✓</span>
+                  </div>
+                  <!-- Badge "obrigatório" sobre a imagem -->
+                  <span class="fp-badge-lock" *ngIf="item.obrigatorio">🔒</span>
+                </div>
+                <!-- Informações do item -->
+                <div class="fp-item-info">
+                  <h4 class="fp-item-nome">{{ item.nome }}</h4>
+                  <p class="fp-item-desc">{{ item.descricao }}</p>
+                  <p class="fp-item-preco">{{ item.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
+                </div>
+              </div>
+
+            </div>
+
+            <button class="fp-carousel-btn-sm fp-btn-sm-right" (click)="scrollCategoria(categoria.id, 1)">›</button>
+          </div>
+          <!-- FIM CARROSSEL -->
+
+        </div>
+      </div>
+      <!-- FIM CATEGORIAS -->
+
+      <!-- Botões de navegação do wizard -->
+      <div class="fp-step-actions mt-5 d-flex gap-3">
+        <button type="button" class="btn fp-btn-voltar" (click)="voltarEtapa()">← Voltar</button>
+        <button type="button" class="btn fp-btn-avancar" (click)="avancarEtapa()" [disabled]="itensSelecionados.length === 0">
+          Próximo: Revisar Orçamento →
+        </button>
+      </div>
+
+    </div>
+    <!-- FIM ETAPA 1 -->
+
+
+    <!-- ================================================
+         ETAPA 2: REVISÃO DO ORÇAMENTO
+         ================================================ -->
+    <div class="fp-step-content" *ngIf="etapaAtual === 2">
+
+      <div class="fp-section-header mb-5">
+        <p class="fp-eyebrow">Etapa 3 de 4</p>
+        <h2 class="fp-step-title">Revise seu <em>Orçamento</em></h2>
+        <p class="fp-step-subtitle">Confirme os itens selecionados antes de enviar.</p>
+      </div>
+
+      <!-- Lista dos itens selecionados -->
+      <div class="fp-revisao-lista">
+        <div
+          *ngFor="let item of itensSelecionadosCompletos"
+          class="fp-revisao-item d-flex align-items-center gap-3"
+        >
+          <!-- Miniatura do item -->
+          <div class="fp-revisao-img" [style.backgroundImage]="'url(' + item.imagemUrl + ')'"></div>
+          <!-- Dados do item -->
+          <div class="flex-grow-1">
+            <p class="fp-revisao-nome mb-0">{{ item.nome }}</p>
+            <p class="fp-revisao-cat mb-0">{{ item.categoria | titlecase }}</p>
+          </div>
+          <!-- Preço à direita -->
+          <p class="fp-revisao-preco mb-0">{{ item.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
+          <!-- Botão remover (desabilitado para obrigatórios) -->
+          <button
+            class="fp-btn-remover"
+            (click)="removerItem(item.id!)"
+            [disabled]="item.obrigatorio"
+            [title]="item.obrigatorio ? 'Item obrigatório' : 'Remover item'"
+          >
+            {{ item.obrigatorio ? '🔒' : '×' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Totalizador na revisão -->
+      <div class="fp-revisao-total mt-4">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="fp-total-label">Subtotal</span>
+          <span class="fp-total-valor">{{ subtotal | currency:'BRL':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="fp-total-label">Taxa de serviço (5%)</span>
+          <span class="fp-total-valor">{{ taxaServico | currency:'BRL':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="d-flex justify-content-between fp-total-final">
+          <span>Total</span>
+          <span>{{ total | currency:'BRL':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="fp-step-actions mt-5 d-flex gap-3">
+        <button type="button" class="btn fp-btn-voltar" (click)="voltarEtapa()">← Voltar</button>
+        <button type="button" class="btn fp-btn-avancar" (click)="avancarEtapa()">
+          Confirmar e Enviar →
+        </button>
+      </div>
+    </div>
+    <!-- FIM ETAPA 2 -->
+
+
+    <!-- ================================================
+         ETAPA 3: CONFIRMAÇÃO / SUCESSO
+         ================================================ -->
+    <div class="fp-step-content fp-sucesso" *ngIf="etapaAtual === 3">
+      <div class="text-center">
+        <!-- Ícone de sucesso -->
+        <div class="fp-sucesso-icon">✓</div>
+        <h2 class="fp-step-title mt-4">Orçamento <em>Enviado!</em></h2>
+        <p class="fp-step-subtitle mt-3">
+          Seu orçamento foi recebido com sucesso.<br />
+          Nossa equipe entrará em contato em até 24h pelo e-mail <strong>{{ dadosEventoForm.get('emailCliente')?.value }}</strong>.
+        </p>
+        <!-- Número do pedido retornado pelo Spring Boot -->
+        <div class="fp-numero-pedido mt-4" *ngIf="numeroPedido">
+          <p class="fp-eyebrow">Número do pedido</p>
+          <p class="fp-pedido-num">#{{ numeroPedido }}</p>
+        </div>
+        <a routerLink="/home" class="btn fp-btn-avancar mt-4 d-inline-block">Voltar ao Início</a>
+      </div>
+    </div>
+    <!-- FIM ETAPA 3 -->
+
+  </main>
+  <!-- FIM PAINEL DE SELEÇÃO -->
+
+
+  <!-- ================================================
+       ASIDE FLUTUANTE: Resumo do Orçamento (GlassMorphism)
+       Visível a partir da etapa 1 (seleção de itens)
+       ================================================ -->
+  <aside class="fp-budget-aside" *ngIf="etapaAtual >= 1 && etapaAtual < 3">
+
+    <!-- Cabeçalho do aside -->
+    <div class="fp-aside-header">
+      <h3 class="fp-aside-title">Resumo do Orçamento</h3>
+      <span class="fp-aside-badge">{{ itensSelecionados.length }} itens</span>
+    </div>
+
+    <!-- Dados do evento (da etapa 0) -->
+    <div class="fp-aside-evento mb-4" *ngIf="dadosEventoForm.get('tipoEvento')?.value">
+      <p class="fp-aside-label">Evento</p>
+      <p class="fp-aside-valor">{{ dadosEventoForm.get('tipoEvento')?.value | titlecase }}</p>
+      <p class="fp-aside-label mt-2" *ngIf="dadosEventoForm.get('dataEvento')?.value">Data</p>
+      <p class="fp-aside-valor" *ngIf="dadosEventoForm.get('dataEvento')?.value">
+        {{ dadosEventoForm.get('dataEvento')?.value | date:'dd/MM/yyyy' }}
+      </p>
+    </div>
+
+    <!-- Lista de itens selecionados no aside -->
+    <div class="fp-aside-itens">
+      <!-- Mensagem quando não há itens -->
+      <p class="fp-aside-vazio" *ngIf="itensSelecionados.length === 0">
+        Selecione os serviços ao lado para montar seu orçamento.
+      </p>
+
+      <!-- *ngFor → lista os itens selecionados no aside -->
+      <div
+        *ngFor="let item of itensSelecionadosCompletos"
+        class="fp-aside-item d-flex justify-content-between align-items-start"
+      >
+        <div class="flex-grow-1">
+          <p class="fp-aside-item-nome mb-0">{{ item.nome }}</p>
+          <p class="fp-aside-item-cat mb-0">{{ item.categoria | titlecase }}</p>
+        </div>
+        <span class="fp-aside-item-preco">{{ item.preco | currency:'BRL':'symbol':'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <!-- Separador -->
+    <div class="fp-aside-divider"></div>
+
+    <!-- Totais calculados em tempo real -->
+    <div class="fp-aside-totais">
+      <!-- subtotal e total são calculados pelo .ts e atualizados automaticamente -->
+      <div class="d-flex justify-content-between mb-2">
+        <span class="fp-aside-label">Subtotal</span>
+        <span class="fp-aside-label">{{ subtotal | currency:'BRL':'symbol':'1.2-2' }}</span>
+      </div>
+      <div class="d-flex justify-content-between mb-3">
+        <span class="fp-aside-label">Taxa (5%)</span>
+        <span class="fp-aside-label">{{ taxaServico | currency:'BRL':'symbol':'1.2-2' }}</span>
+      </div>
+      <div class="d-flex justify-content-between fp-aside-total-final">
+        <strong>Total</strong>
+        <!-- Animação de atualização do preço em tempo real -->
+        <strong class="fp-total-animado">{{ total | currency:'BRL':'symbol':'1.2-2' }}</strong>
+      </div>
+    </div>
+
+    <!-- Botão de envio rápido do aside (na etapa de revisão) -->
+    <button
+      *ngIf="etapaAtual === 2"
+      class="btn fp-btn-enviar w-100 mt-4"
+      (click)="enviarOrcamento()"
+      [disabled]="enviando"
+    >
+      <span *ngIf="enviando" class="spinner-border spinner-border-sm me-2"></span>
+      {{ enviando ? 'Enviando...' : 'Enviar Orçamento' }}
+    </button>
+
+  </aside>
+  <!-- FIM ASIDE -->
+
+</div>
+<!-- FIM LAYOUT SPLIT -->

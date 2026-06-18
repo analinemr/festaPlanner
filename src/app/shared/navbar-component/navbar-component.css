@@ -1,4 +1,31 @@
-/* ---- NAV ---- */
+/* ============================================================
+   NAVBAR COMPONENT — CSS
+   Fiel ao index.css modelo (variáveis, comportamento scroll, mobile)
+   Paleta: branco sobre hero → carvão ao rolar
+   ============================================================ */
+
+/* ---- VARIÁVEIS (mesmas do index.css modelo) ---- */
+:root {
+  --white:        #FFFFFF;
+  --off-white:    #F8F8F7;
+  --silver:       #C8C8C8;
+  --silver-light: #E8E8E6;
+  --silver-dark:  #A0A0A0;
+  --slate:        #6B7280;
+  --slate-dark:   #4B5563;
+  --charcoal:     #2D2D2D;
+  --black:        #0A0A0A;
+  --gold:         #C9A96E;
+  --gold-light:   #E8D5A8;
+  --font-body:    'DM Sans', sans-serif;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --transition:   0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ============================================================
+   NAVBAR — estrutura base
+   ============================================================ */
+
 .nav {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -8,16 +35,21 @@
   justify-content: space-between;
   padding: 0 48px;
   height: 72px;
+
+  /* Começa transparente — muda ao rolar */
   background: transparent;
   transition: background var(--transition), box-shadow var(--transition);
 }
 
+/* Estado após 60px de scroll */
 .nav.scrolled {
-  background: rgba(255,255,255,0.96);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 1px 0 var(--silver-light);
 }
 
+/* ---- LOGO ---- */
 .nav-logo {
   display: flex;
   align-items: center;
@@ -25,22 +57,37 @@
   font-family: var(--font-body);
   font-size: 1.1rem;
   color: var(--white);
+  text-decoration: none;
   transition: color var(--transition);
 }
 
-.nav.scrolled .nav-logo { color: var(--charcoal); }
+.nav.scrolled .nav-logo {
+  color: var(--charcoal);
+}
 
 .logo-icon {
   color: var(--gold);
   font-size: 1.2rem;
 }
 
-.logo-text strong { font-weight: 500; }
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+}
 
+.logo-text strong {
+  font-weight: 500;
+}
+
+/* ---- LINKS DESKTOP ---- */
 .nav-links {
   display: flex;
   list-style: none;
   gap: 40px;
+  margin: 0;
+  padding: 0;
 }
 
 .nav-links a {
@@ -48,32 +95,49 @@
   font-weight: 400;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
   transition: color var(--transition);
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
 }
 
-.nav.scrolled .nav-links a { color: var(--slate); }
+.nav.scrolled .nav-links a {
+  color: var(--slate);
+}
 
+/* Hover e estado ativo */
 .nav-links a:hover,
-.nav-links a.active { color: var(--white); }
-.nav.scrolled .nav-links a:hover,
-.nav.scrolled .nav-links a.active { color: var(--charcoal); }
+.nav-links a.active {
+  color: var(--white);
+  border-bottom-color: rgba(255,255,255,0.5);
+}
 
+.nav.scrolled .nav-links a:hover,
+.nav.scrolled .nav-links a.active {
+  color: var(--charcoal);
+  border-bottom-color: var(--gold);
+}
+
+/* ---- BOTÃO CTA ---- */
 .btn-cta {
   padding: 10px 28px;
   background: var(--white);
   color: var(--black);
+  font-family: var(--font-body);
   font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   border-radius: 2px;
+  text-decoration: none;
   transition: background var(--transition), color var(--transition), box-shadow var(--transition);
 }
 
 .btn-cta:hover {
   background: var(--gold);
   color: var(--white);
+  box-shadow: 0 4px 16px rgba(201,169,110,0.35);
 }
 
 .nav.scrolled .btn-cta {
@@ -81,6 +145,11 @@
   color: var(--white);
 }
 
+.nav.scrolled .btn-cta:hover {
+  background: var(--gold);
+}
+
+/* ---- HAMBURGUER (mobile) ---- */
 .hamburger {
   display: none;
   background: none;
@@ -88,6 +157,95 @@
   font-size: 1.4rem;
   color: var(--white);
   cursor: pointer;
+  padding: 4px;
+  transition: color var(--transition);
 }
 
-.nav.scrolled .hamburger { color: var(--charcoal); }
+.nav.scrolled .hamburger {
+  color: var(--charcoal);
+}
+
+/* ---- MENU MOBILE ---- */
+.mobile-menu {
+  display: none;                /* oculto por padrão */
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  padding: 24px 32px 32px;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+
+  /* Animação de entrada */
+  transform: translateY(-8px);
+  opacity: 0;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+/* Quando aberto: muda display E anima */
+.mobile-menu.open {
+  display: flex;
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.mobile-menu a {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--charcoal);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.mobile-menu a:hover {
+  color: var(--gold);
+}
+
+/* Botão CTA no menu mobile */
+.btn-cta-mobile {
+  padding: 12px 24px;
+  background: var(--charcoal);
+  color: var(--white) !important;
+  text-align: center;
+  border-radius: 2px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background var(--transition) !important;
+}
+
+.btn-cta-mobile:hover {
+  background: var(--gold) !important;
+  color: var(--white) !important;
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+
+/* Tablet/Mobile: esconde links e CTA, mostra hamburguer */
+@media (max-width: 768px) {
+  .nav-links,
+  .btn-cta {
+    display: none;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .nav {
+    padding: 0 24px;
+  }
+}
+
+/* Mobile pequeno */
+@media (max-width: 480px) {
+  .mobile-menu {
+    padding: 20px 24px 28px;
+  }
+}

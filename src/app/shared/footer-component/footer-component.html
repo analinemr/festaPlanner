@@ -1,26 +1,61 @@
-<!-- FOOTER -->
+<!--
+  FOOTER COMPONENT — Rodapé global
+  Fiel ao index.html modelo:
+  - Logo + descrição à esquerda
+  - Dois blocos de links (Plataforma + Empresa)
+  - Linha inferior: copyright + hashtags
+  Paleta: fundo preto (#0A0A0A), textos slate/silver
+-->
+
 <footer class="footer">
+
+  <!-- CONTEÚDO PRINCIPAL DO FOOTER -->
   <div class="container footer-inner">
+
+    <!-- COLUNA: Marca + descrição -->
     <div class="footer-brand">
-      <span class="logo-icon">✦</span>
-      <span class="logo-text">Festa<strong>Planner</strong></span>
-      <p>Transformando ideias em celebrações inesquecíveis.</p>
+      <a routerLink="/home" class="footer-logo">
+        <span class="logo-icon">✦</span>
+        <span class="logo-text">Festa<strong>Planner</strong></span>
+      </a>
+      <p class="footer-desc">Transformando ideias em celebrações inesquecíveis.</p>
     </div>
+
+    <!-- COLUNAS DE LINKS -->
     <div class="footer-links">
-      <div><strong>Plataforma</strong>
-        <a href="index.html">Início</a>
-        <a href="orcamento.html">Criar Orçamento</a>
+
+      <!-- Coluna: Plataforma -->
+      <div class="footer-links-col">
+        <strong>Plataforma</strong>
+        <a routerLink="/home">Início</a>
+        <a routerLink="/orcamento">Criar Orçamento</a>
+        <a routerLink="/catalogo">Catálogo</a>
         <a href="#">Temas</a>
       </div>
-      <div><strong>Empresa</strong>
+
+      <!-- Coluna: Empresa -->
+      <div class="footer-links-col">
+        <strong>Empresa</strong>
         <a href="#">Sobre nós</a>
         <a href="#">Contato</a>
         <a href="#">Para Casas de Festas</a>
       </div>
+
+      <!-- Coluna: Suporte -->
+      <div class="footer-links-col">
+        <strong>Suporte</strong>
+        <a href="#">Central de Ajuda</a>
+        <a href="#">Política de Privacidade</a>
+        <a href="#">Termos de Uso</a>
+      </div>
+
     </div>
   </div>
+
+  <!-- LINHA INFERIOR: copyright + hashtags -->
   <div class="footer-bottom">
-    <p>© 2026 Festa Planner · Todos os direitos reservados</p>
-    <p>#festaperfeita · #planejamentodeeventos</p>
+    <p>© {{ anoAtual }} Festa Planner &nbsp;·&nbsp; Todos os direitos reservados</p>
+    <p class="footer-hashtags">#festaperfeita &nbsp;·&nbsp; #planejamentodeeventos</p>
   </div>
+
 </footer>

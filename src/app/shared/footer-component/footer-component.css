@@ -1,47 +1,133 @@
-/* ---- FOOTER ---- */
+/* ============================================================
+   FOOTER COMPONENT — CSS
+   Fiel ao index.css modelo
+   Fundo: #0A0A0A (preto profundo)
+   Textos: silver, slate, white
+   ============================================================ */
+
+:root {
+  --white:        #FFFFFF;
+  --silver:       #C8C8C8;
+  --silver-light: #E8E8E6;
+  --silver-dark:  #A0A0A0;
+  --slate:        #6B7280;
+  --slate-dark:   #4B5563;
+  --charcoal:     #2D2D2D;
+  --black:        #0A0A0A;
+  --gold:         #C9A96E;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'DM Sans', sans-serif;
+  --transition:   0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ============================================================
+   FOOTER — estrutura
+   ============================================================ */
+
 .footer {
   background: var(--black);
   padding: 60px 0 0;
 }
 
+/* Container centralizado */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+/* Linha principal: logo à esquerda + links à direita */
 .footer-inner {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 40px;
   flex-wrap: wrap;
   padding-bottom: 48px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.footer-brand .logo-text { color: var(--white); font-size: 1rem; }
-.footer-brand p {
+/* ---- COLUNA DA MARCA ---- */
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 180px;
+}
+
+/* Logo no footer */
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  color: var(--gold);
+  font-size: 1.2rem;
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: var(--white);
+}
+
+.logo-text strong {
+  font-weight: 500;
+}
+
+/* Descrição abaixo do logo */
+.footer-desc {
+  font-family: var(--font-body);
   font-size: 0.82rem;
   color: var(--slate);
-  margin-top: 12px;
   line-height: 1.6;
+  max-width: 260px;
+  margin: 0;
 }
 
+/* ---- COLUNAS DE LINKS ---- */
 .footer-links {
   display: flex;
   gap: 60px;
   flex-wrap: wrap;
 }
 
-.footer-links div {
+/* Cada coluna de links */
+.footer-links-col {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 130px;
 }
-.footer-links strong {
+
+/* Título da coluna */
+.footer-links-col strong {
+  font-family: var(--font-body);
   font-size: 0.72rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--silver-dark);
   margin-bottom: 4px;
 }
-.footer-links a { font-size: 0.85rem; color: var(--slate); transition: color var(--transition); }
-.footer-links a:hover { color: var(--white); }
 
+/* Links individuais */
+.footer-links-col a {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--slate);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.footer-links-col a:hover {
+  color: var(--white);
+}
+
+/* ---- LINHA INFERIOR ---- */
 .footer-bottom {
   display: flex;
   justify-content: space-between;
@@ -50,4 +136,54 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-.footer-bottom p { font-size: 0.75rem; color: var(--slate-dark); }
+
+.footer-bottom p {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--slate-dark);
+  margin: 0;
+}
+
+/* Hashtags à direita */
+.footer-hashtags {
+  color: var(--slate-dark);
+  letter-spacing: 0.03em;
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .footer-inner {
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .footer-links {
+    gap: 32px;
+    width: 100%;
+  }
+
+  .footer-desc {
+    max-width: 100%;
+  }
+
+  .footer-bottom {
+    padding: 24px;
+    flex-direction: column;
+    text-align: center;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 24px;
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 24px;
+  }
+}

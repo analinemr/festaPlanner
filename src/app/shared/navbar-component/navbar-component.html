@@ -1,14 +1,71 @@
-<nav class="nav">
-  <a href="index.html" class="nav-logo">
+<!--
+  NAVBAR COMPONENT — Barra de navegação global
+  Fiel ao layout do index.html modelo:
+  - Logo à esquerda (ícone ✦ + texto)
+  - Links centrais com estado active via routerLinkActive
+  - Botão CTA "Orçamento" à direita
+  - Hamburguer no mobile
+  - Efeito scroll: transparente → branco fosco via classe .scrolled
+  Paleta original: branco sobre hero, cinza carvão ao rolar
+-->
+
+<nav class="nav" [class.scrolled]="scrolled">
+
+  <!-- LOGO -->
+  <a routerLink="/home" class="nav-logo">
     <span class="logo-icon">✦</span>
     <span class="logo-text">Festa<strong>Planner</strong></span>
   </a>
+
+  <!-- LINKS DESKTOP -->
   <ul class="nav-links">
-    <li><a href="index.html" class="active">Início</a></li>
-    <li><a href="orcamento.html">Meus Orçamentos</a></li>
-    <li><a href="#">Mensagens</a></li>
-    <li><a href="#">Conta</a></li>
+    <li>
+      <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+        Início
+      </a>
+    </li>
+    <li>
+      <a routerLink="/orcamento" routerLinkActive="active">
+        Meus Orçamentos
+      </a>
+    </li>
+    <li>
+      <a routerLink="/catalogo" routerLinkActive="active">
+        Catálogo
+      </a>
+    </li>
+    <li>
+      <a href="#" routerLinkActive="active">
+        Mensagens
+      </a>
+    </li>
+    <li>
+      <a href="#" routerLinkActive="active">
+        Conta
+      </a>
+    </li>
   </ul>
-  <a href="orcamento.html" class="btn-cta">Orçamento</a>
-  <button class="hamburger" id="hamburger" aria-label="Menu">&#9776;</button>
+
+  <!-- BOTÃO CTA DESKTOP -->
+  <a routerLink="/orcamento" class="btn-cta">Orçamento</a>
+
+  <!-- HAMBURGUER (mobile) -->
+  <button
+    class="hamburger"
+    (click)="toggleMenu()"
+    [attr.aria-expanded]="menuAberto"
+    aria-label="Abrir menu"
+  >
+    &#9776;
+  </button>
+
 </nav>
+
+<!-- MENU MOBILE (dropdown) -->
+<div class="mobile-menu" [class.open]="menuAberto">
+  <a routerLink="/home"      (click)="fecharMenu()">Início</a>
+  <a routerLink="/orcamento" (click)="fecharMenu()">Meus Orçamentos</a>
+  <a routerLink="/catalogo"  (click)="fecharMenu()">Catálogo</a>
+  <a href="#"                (click)="fecharMenu()">Mensagens</a>
+  <a routerLink="/orcamento" class="btn-cta-mobile" (click)="fecharMenu()">Orçamento</a>
+</div>

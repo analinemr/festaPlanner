@@ -1,0 +1,284 @@
+<!--
+  AGENDA COMPONENT — Página de Agenda Standalone do Admin
+  Layout: Calendário completo + lista lateral de eventos do dia
+  Design: Painel "Fintech de Luxo", escuro, preciso
+  Bootstrap 5 + CSS customizado
+  Integração: AgendaService → /api/agendas/mes/:ano/:mes (Spring Boot)
+-->
+
+<div class="fp-adm-wrapper">
+
+  <!-- SIDEBAR (mesma do admin) -->
+  <aside class="fp-sidebar" [class.fechada]="sidebarFechada">
+    <div class="fp-sidebar-brand">
+      <span class="fp-logo-icon">✦</span>
+      <span class="fp-logo-text" *ngIf="!sidebarFechada">Festa<strong>Planner</strong></span>
+    </div>
+    <nav class="fp-sidebar-nav">
+      <button class="fp-nav-item" routerLink="/admin" title="Dashboard">
+        <span class="fp-nav-icone">📊</span>
+        <span class="fp-nav-nome" *ngIf="!sidebarFechada">Dashboard</span>
+      </button>
+      <button class="fp-nav-item" routerLink="/admin/pedidos" title="Pedidos">
+        <span class="fp-nav-icone">📋</span>
+        <span class="fp-nav-nome" *ngIf="!sidebarFechada">Pedidos</span>
+      </button>
+      <button class="fp-nav-item ativo" routerLink="/admin/agenda" title="Agenda">
+        <span class="fp-nav-icone">📅</span>
+        <span class="fp-nav-nome" *ngIf="!sidebarFechada">Agenda</span>
+      </button>
+      <button class="fp-nav-item" routerLink="/admin" title="Catálogo">
+        <span class="fp-nav-icone">🛍️</span>
+        <span class="fp-nav-nome" *ngIf="!sidebarFechada">Catálogo</span>
+      </button>
+    </nav>
+    <div class="fp-sidebar-footer">
+      <button class="fp-btn-logout" (click)="logout()" title="Sair">
+        <span>⏻</span>
+        <span *ngIf="!sidebarFechada">Sair</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ÁREA PRINCIPAL -->
+  <main class="fp-adm-content">
+
+    <!-- TOPBAR -->
+    <header class="fp-topbar">
+      <button class="fp-toggle-sidebar" (click)="alternarSidebar()">☰</button>
+      <h1 class="fp-topbar-titulo">Agenda de Eventos</h1>
+      <div class="fp-topbar-right d-flex align-items-center gap-3">
+        <!-- Botão Google Calendar -->
+        <button class="btn fp-btn-google" (click)="abrirGoogleCalendar()">
+          📅 Google Agenda
+        </button>
+        <!-- Botão novo evento -->
+        <button class="btn fp-btn-novo-evento" (click)="abrirFormNovoEvento()">
+          + Novo Evento
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO DA AGENDA -->
+    <div class="fp-agenda-layout">
+
+      <!-- COLUNA ESQUERDA: Calendário -->
+      <div class="fp-cal-container">
+
+        <!-- Navegação do mês -->
+        <div class="fp-cal-nav-header">
+          <button class="fp-cal-nav-btn" (click)="mesAnterior()">‹</button>
+          <div class="fp-cal-nav-info">
+            <h2 class="fp-cal-mes-titulo">{{ mesAtualLabel }}</h2>
+            <span class="fp-cal-ano">{{ anoAtual }}</span>
+          </div>
+          <button class="fp-cal-nav-btn" (click)="proximoMes()">›</button>
+        </div>
+
+        <!-- Loading do calendário -->
+        <div *ngIf="carregando" class="text-center py-4">
+          <div class="spinner-border spinner-border-sm" style="color:var(--prata)"></div>
+        </div>
+
+        <!-- Grid do calendário 7 colunas -->
+        <div class="fp-cal-grid" *ngIf="!carregando">
+          <!-- Cabeçalho com dias da semana -->
+          <div *ngFor="let d of diasSemana" class="fp-cal-col-header">{{ d }}</div>
+
+          <!-- Células dos dias -->
+          <div
+            *ngFor="let dia of diasDoMes"
+            class="fp-cal-cell"
+            [class.hoje]="dia.hoje"
+            [class.tem-evento]="dia.eventos.length > 0"
+            [class.outro-mes]="!dia.mesAtual"
+            [class.selecionado]="diaSelecionado === dia.data"
+            (click)="selecionarDia(dia)"
+          >
+            <!-- Número do dia -->
+            <span class="fp-cal-cell-num">{{ dia.numero }}</span>
+
+            <!-- Lista de eventos do dia (máx 3 visíveis) -->
+            <div class="fp-cal-eventos-lista">
+              <div
+                *ngFor="let evento of dia.eventos | slice:0:3"
+                class="fp-cal-evento-item"
+                [style.backgroundColor]="evento.cor"
+                (click)="selecionarEvento(evento); $event.stopPropagation()"
+                [title]="evento.titulo"
+              >
+                {{ evento.titulo }}
+              </div>
+              <!-- Indicador "+N mais" se houver mais de 3 eventos -->
+              <div *ngIf="dia.eventos.length > 3" class="fp-cal-mais">
+                +{{ dia.eventos.length - 3 }} mais
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- FIM GRID -->
+
+        <!-- Legenda de cores -->
+        <div class="fp-cal-legenda">
+          <div *ngFor="let leg of legendaCores" class="fp-legenda-item">
+            <span class="fp-legenda-cor" [style.backgroundColor]="leg.cor"></span>
+            <span>{{ leg.label }}</span>
+          </div>
+        </div>
+
+      </div>
+      <!-- FIM CALENDÁRIO -->
+
+
+      <!-- COLUNA DIREITA: Eventos do dia selecionado -->
+      <aside class="fp-agenda-sidebar">
+
+        <!-- Cabeçalho do painel lateral -->
+        <div class="fp-agenda-sidebar-header">
+          <p class="fp-eyebrow">Eventos do Dia</p>
+          <h3 class="fp-dia-selecionado-label">{{ diaSelecionadoLabel }}</h3>
+        </div>
+
+        <!-- Loading dos eventos do dia -->
+        <div *ngIf="carregandoEventosDia" class="text-center py-4">
+          <div class="spinner-border spinner-border-sm" style="color:var(--prata)"></div>
+        </div>
+
+        <!-- Lista de eventos do dia selecionado -->
+        <div class="fp-eventos-dia-lista" *ngIf="!carregandoEventosDia">
+
+          <!-- Sem eventos -->
+          <div *ngIf="eventosDiaSelecionado.length === 0" class="fp-sem-eventos">
+            <p class="fp-sem-eventos-icone">📅</p>
+            <p class="fp-sem-eventos-texto">Nenhum evento agendado neste dia.</p>
+            <button class="btn fp-btn-agendar" (click)="abrirFormNovoEvento()">
+              + Agendar Evento
+            </button>
+          </div>
+
+          <!-- Cards de eventos do dia -->
+          <div
+            *ngFor="let evento of eventosDiaSelecionado"
+            class="fp-evento-card"
+            [class.ativo]="eventoSelecionado?.id === evento.id"
+            (click)="selecionarEvento(evento)"
+          >
+            <!-- Barra colorida lateral -->
+            <div class="fp-evento-cor-bar" [style.backgroundColor]="evento.cor"></div>
+
+            <!-- Dados do evento -->
+            <div class="fp-evento-info">
+              <p class="fp-evento-titulo">{{ evento.titulo }}</p>
+              <p class="fp-evento-cliente" *ngIf="evento.nomeCliente">
+                👤 {{ evento.nomeCliente }}
+              </p>
+              <p class="fp-evento-horario">
+                🕐 {{ evento.dataInicio | date:'HH:mm' }} — {{ evento.dataFim | date:'HH:mm' }}
+              </p>
+              <span class="fp-evento-status" [class]="'status-' + evento.status">
+                {{ traduzirStatus(evento.status) }}
+              </span>
+            </div>
+
+            <!-- Ações do evento -->
+            <div class="fp-evento-acoes">
+              <button class="fp-btn-evento-acao" (click)="editarEvento(evento); $event.stopPropagation()" title="Editar">✏️</button>
+              <button class="fp-btn-evento-acao fp-btn-excluir" (click)="confirmarExclusao(evento); $event.stopPropagation()" title="Excluir">🗑️</button>
+            </div>
+          </div>
+
+        </div>
+        <!-- FIM LISTA DE EVENTOS -->
+
+
+        <!-- FORMULÁRIO: Novo/Editar Evento -->
+        <div class="fp-form-evento" *ngIf="exibirFormEvento">
+          <div class="fp-form-evento-header">
+            <h4>{{ eventoEditando ? 'Editar Evento' : 'Novo Evento' }}</h4>
+            <button class="fp-btn-fechar-form" (click)="fecharFormEvento()">×</button>
+          </div>
+
+          <form [formGroup]="eventoForm" (ngSubmit)="salvarEvento()" class="fp-form-body">
+
+            <div class="fp-form-group mb-3">
+              <label class="fp-label">Título *</label>
+              <input type="text" class="fp-input form-control" formControlName="titulo" placeholder="Ex: Casamento Silva & Santos" />
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="fp-label">Início *</label>
+                <input type="datetime-local" class="fp-input form-control" formControlName="dataInicio" />
+              </div>
+              <div class="col-6">
+                <label class="fp-label">Fim *</label>
+                <input type="datetime-local" class="fp-input form-control" formControlName="dataFim" />
+              </div>
+            </div>
+
+            <div class="fp-form-group mb-3">
+              <label class="fp-label">Cliente</label>
+              <input type="text" class="fp-input form-control" formControlName="nomeCliente" placeholder="Nome do responsável" />
+            </div>
+
+            <div class="fp-form-group mb-3">
+              <label class="fp-label">Tipo de Evento</label>
+              <select class="fp-input form-select" formControlName="tipoEvento">
+                <option value="">Selecionar...</option>
+                <option value="casamento">Casamento</option>
+                <option value="debutante">15 Anos</option>
+                <option value="infantil">Infantil</option>
+                <option value="corporativo">Corporativo</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+
+            <!-- Seletor de cor -->
+            <div class="fp-form-group mb-3">
+              <label class="fp-label">Cor no Calendário</label>
+              <div class="fp-cores-palette">
+                <button
+                  *ngFor="let cor of coresPaleta"
+                  type="button"
+                  class="fp-cor-btn"
+                  [style.backgroundColor]="cor"
+                  [class.selecionada]="eventoForm.get('cor')?.value === cor"
+                  (click)="eventoForm.patchValue({ cor })"
+                ></button>
+              </div>
+            </div>
+
+            <div class="fp-form-group mb-4">
+              <label class="fp-label">Status</label>
+              <select class="fp-input form-select" formControlName="status">
+                <option value="pendente">Pendente</option>
+                <option value="confirmado">Confirmado</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </div>
+
+            <div class="fp-form-group mb-4">
+              <label class="fp-label">Observações</label>
+              <textarea class="fp-input form-control" formControlName="observacoes" rows="2" placeholder="Notas internas..."></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn fp-btn-salvar-evento flex-grow-1" [disabled]="salvandoEvento || eventoForm.invalid">
+                <span *ngIf="salvandoEvento" class="spinner-border spinner-border-sm me-2"></span>
+                {{ salvandoEvento ? 'Salvando...' : (eventoEditando ? 'Salvar' : 'Agendar') }}
+              </button>
+              <button type="button" class="btn fp-btn-cancelar-evento" (click)="fecharFormEvento()">Cancelar</button>
+            </div>
+
+          </form>
+        </div>
+        <!-- FIM FORMULÁRIO -->
+
+      </aside>
+      <!-- FIM SIDEBAR DIREITA -->
+
+    </div>
+    <!-- FIM AGENDA LAYOUT -->
+
+  </main>
+</div>

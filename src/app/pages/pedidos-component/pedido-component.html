@@ -1,0 +1,246 @@
+<!--
+  PEDIDOS COMPONENT — Gestão Completa de Pedidos / Orçamentos
+  Layout: Sidebar admin + Tabela com filtros + Modal de detalhe
+  Integração: PedidosService → /api/pedidos (Spring Boot)
+-->
+
+<div class="fp-adm-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="fp-sidebar" [class.fechada]="sidebarFechada">
+    <div class="fp-sidebar-brand">
+      <span class="fp-logo-icon">✦</span>
+      <span class="fp-logo-text" *ngIf="!sidebarFechada">Festa<strong>Planner</strong></span>
+    </div>
+    <nav class="fp-sidebar-nav">
+      <button class="fp-nav-item" routerLink="/admin" title="Dashboard"><span class="fp-nav-icone">📊</span><span class="fp-nav-nome" *ngIf="!sidebarFechada">Dashboard</span></button>
+      <button class="fp-nav-item ativo" routerLink="/admin/pedidos" title="Pedidos"><span class="fp-nav-icone">📋</span><span class="fp-nav-nome" *ngIf="!sidebarFechada">Pedidos</span><span class="fp-nav-badge" *ngIf="totalNovos > 0 && !sidebarFechada">{{ totalNovos }}</span></button>
+      <button class="fp-nav-item" routerLink="/admin/agenda" title="Agenda"><span class="fp-nav-icone">📅</span><span class="fp-nav-nome" *ngIf="!sidebarFechada">Agenda</span></button>
+      <button class="fp-nav-item" routerLink="/admin" title="Catálogo"><span class="fp-nav-icone">🛍️</span><span class="fp-nav-nome" *ngIf="!sidebarFechada">Catálogo</span></button>
+    </nav>
+    <div class="fp-sidebar-footer">
+      <button class="fp-btn-logout" (click)="logout()" title="Sair"><span>⏻</span><span *ngIf="!sidebarFechada">Sair</span></button>
+    </div>
+  </aside>
+
+  <!-- ÁREA PRINCIPAL -->
+  <main class="fp-adm-content">
+
+    <!-- TOPBAR -->
+    <header class="fp-topbar">
+      <button class="fp-toggle-sidebar" (click)="alternarSidebar()">☰</button>
+      <h1 class="fp-topbar-titulo">Pedidos & Orçamentos</h1>
+      <div class="fp-topbar-right">
+        <!-- Badge de novos pedidos -->
+        <div class="fp-badge-novos" *ngIf="totalNovos > 0">
+          <span>{{ totalNovos }} novo{{ totalNovos > 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <div class="fp-pedidos-body">
+
+      <!-- CARDS DE STATUS RÁPIDO (filtros visuais) -->
+      <div class="row g-3 mb-4">
+        <div *ngFor="let card of cardsStatus" class="col-6 col-lg-3">
+          <div
+            class="fp-status-card"
+            [class.ativo]="filtroStatus === card.status"
+            (click)="filtrarPorStatus(card.status)"
+          >
+            <span class="fp-status-card-icone">{{ card.icone }}</span>
+            <div>
+              <p class="fp-status-card-num">{{ card.quantidade }}</p>
+              <p class="fp-status-card-label">{{ card.label }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BARRA DE FILTROS AVANÇADOS -->
+      <div class="fp-filtros-avancados mb-4">
+        <!-- Busca por texto -->
+        <div class="fp-busca-wrapper">
+          <span>🔍</span>
+          <input
+            type="text"
+            class="fp-busca-input"
+            placeholder="Buscar por cliente ou evento..."
+            [(ngModel)]="termoBusca"
+            (input)="aplicarFiltros()"
+          />
+        </div>
+
+        <!-- Filtro por data -->
+        <div class="fp-filtro-data-group">
+          <label class="fp-label">De</label>
+          <input type="date" class="fp-input-sm" [(ngModel)]="dataInicio" (change)="aplicarFiltros()" />
+        </div>
+        <div class="fp-filtro-data-group">
+          <label class="fp-label">Até</label>
+          <input type="date" class="fp-input-sm" [(ngModel)]="dataFim" (change)="aplicarFiltros()" />
+        </div>
+
+        <!-- Botão limpar filtros -->
+        <button class="fp-btn-limpar" (click)="limparFiltros()" *ngIf="temFiltroAtivo">
+          Limpar filtros ×
+        </button>
+      </div>
+
+      <!-- LOADING -->
+      <div *ngIf="carregando" class="text-center py-5">
+        <div class="spinner-border" style="color:var(--prata)"></div>
+      </div>
+
+      <!-- TABELA DE PEDIDOS -->
+      <div class="fp-card" *ngIf="!carregando">
+        <div class="fp-card-header d-flex justify-content-between align-items-center">
+          <span class="fp-card-titulo">{{ pedidosFiltrados.length }} pedido{{ pedidosFiltrados.length !== 1 ? 's' : '' }} encontrado{{ pedidosFiltrados.length !== 1 ? 's' : '' }}</span>
+          <!-- Seleção múltipla (futuramente) -->
+          <span class="fp-card-info" *ngIf="filtroStatus">Status: <strong>{{ traduzirStatus(filtroStatus) }}</strong></span>
+        </div>
+
+        <div class="fp-table-wrapper">
+          <table class="fp-table w-100">
+            <thead>
+              <tr>
+                <th (click)="ordenarPor('id')" class="fp-th-sortable"># <span class="fp-sort-icon">{{ iconOrdenacao('id') }}</span></th>
+                <th>Cliente</th>
+                <th (click)="ordenarPor('tipoEvento')" class="fp-th-sortable">Evento <span class="fp-sort-icon">{{ iconOrdenacao('tipoEvento') }}</span></th>
+                <th (click)="ordenarPor('dataEvento')" class="fp-th-sortable">Data do Evento <span class="fp-sort-icon">{{ iconOrdenacao('dataEvento') }}</span></th>
+                <th>Convidados</th>
+                <th (click)="ordenarPor('valorTotal')" class="fp-th-sortable">Valor <span class="fp-sort-icon">{{ iconOrdenacao('valorTotal') }}</span></th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let pedido of pedidosFiltrados"
+                class="fp-table-row"
+                [class.nova]="pedido.status === 'novo'"
+                (click)="abrirDetalhe(pedido)"
+              >
+                <td class="fp-td-id">#{{ pedido.id }}</td>
+                <td>
+                  <div class="fp-cliente-cell">
+                    <div class="fp-avatar">{{ pedido.nomeCliente[0].toUpperCase() }}</div>
+                    <div>
+                      <p class="fp-nome">{{ pedido.nomeCliente }}</p>
+                      <p class="fp-email">{{ pedido.emailCliente }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ pedido.tipoEvento | titlecase }}</td>
+                <td>{{ pedido.dataEvento | date:'dd/MM/yyyy' }}</td>
+                <td>{{ pedido.numeroConvidados }}</td>
+                <td class="fp-td-valor">{{ pedido.valorTotal | currency:'BRL':'symbol':'1.0-0' }}</td>
+                <td>
+                  <span class="fp-badge-status" [class]="'status-' + pedido.status">
+                    {{ traduzirStatus(pedido.status) }}
+                  </span>
+                </td>
+                <td (click)="$event.stopPropagation()">
+                  <div class="fp-acoes-cell">
+                    <button class="fp-btn-acao" (click)="abrirDetalhe(pedido)" title="Ver detalhes">👁</button>
+                    <button class="fp-btn-acao fp-btn-analisar" *ngIf="pedido.status === 'novo'" (click)="mudarStatus(pedido, 'em_analise')" title="Marcar em análise">🔍</button>
+                    <button class="fp-btn-acao fp-btn-aprovar" *ngIf="pedido.status !== 'aprovado' && pedido.status !== 'cancelado'" (click)="mudarStatus(pedido, 'aprovado')" title="Aprovar">✓</button>
+                    <button class="fp-btn-acao fp-btn-cancelar-ped" *ngIf="pedido.status !== 'cancelado'" (click)="mudarStatus(pedido, 'cancelado')" title="Cancelar">✗</button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="pedidosFiltrados.length === 0">
+                <td colspan="8" class="fp-vazio-cell">Nenhum pedido encontrado para os filtros aplicados.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    <!-- FIM CONTEÚDO -->
+
+  </main>
+</div>
+
+<!-- ============================================================
+     MODAL DE DETALHE DO PEDIDO
+     ============================================================ -->
+<div class="fp-modal-overlay" *ngIf="pedidoDetalhe" (click)="fecharDetalhe()">
+  <div class="fp-modal-pedido" (click)="$event.stopPropagation()">
+
+    <!-- Header do modal -->
+    <div class="fp-modal-header">
+      <div>
+        <p class="fp-eyebrow">Pedido #{{ pedidoDetalhe!.id }}</p>
+        <h2 class="fp-modal-titulo">{{ pedidoDetalhe!.nomeCliente }}</h2>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <span class="fp-badge-status" [class]="'status-' + pedidoDetalhe!.status">
+          {{ traduzirStatus(pedidoDetalhe!.status) }}
+        </span>
+        <button class="fp-modal-close" (click)="fecharDetalhe()">×</button>
+      </div>
+    </div>
+
+    <!-- Conteúdo do modal: 2 colunas -->
+    <div class="fp-modal-body">
+
+      <!-- Coluna esquerda: dados do cliente + evento -->
+      <div class="fp-modal-col">
+        <div class="fp-modal-secao">
+          <p class="fp-eyebrow">Dados do Cliente</p>
+          <div class="fp-modal-info-grid">
+            <div class="fp-info-item"><span class="fp-info-label">Nome</span><span class="fp-info-valor">{{ pedidoDetalhe!.nomeCliente }}</span></div>
+            <div class="fp-info-item"><span class="fp-info-label">E-mail</span><span class="fp-info-valor">{{ pedidoDetalhe!.emailCliente }}</span></div>
+            <div class="fp-info-item"><span class="fp-info-label">Telefone</span><span class="fp-info-valor">{{ pedidoDetalhe!.telefoneCliente || '—' }}</span></div>
+          </div>
+        </div>
+
+        <div class="fp-modal-secao">
+          <p class="fp-eyebrow">Dados do Evento</p>
+          <div class="fp-modal-info-grid">
+            <div class="fp-info-item"><span class="fp-info-label">Tipo</span><span class="fp-info-valor">{{ pedidoDetalhe!.tipoEvento | titlecase }}</span></div>
+            <div class="fp-info-item"><span class="fp-info-label">Data</span><span class="fp-info-valor">{{ pedidoDetalhe!.dataEvento | date:'dd/MM/yyyy' }}</span></div>
+            <div class="fp-info-item"><span class="fp-info-label">Convidados</span><span class="fp-info-valor">{{ pedidoDetalhe!.numeroConvidados }}</span></div>
+            <div class="fp-info-item"><span class="fp-info-label">Observações</span><span class="fp-info-valor">{{ pedidoDetalhe!.observacoes || 'Nenhuma' }}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coluna direita: valor + ações -->
+      <div class="fp-modal-col-lateral">
+        <!-- Total -->
+        <div class="fp-modal-valor-box">
+          <p class="fp-eyebrow">Valor Total</p>
+          <p class="fp-modal-valor-num">{{ pedidoDetalhe!.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</p>
+        </div>
+
+        <!-- Ações rápidas no modal -->
+        <div class="fp-modal-acoes">
+          <p class="fp-eyebrow mb-2">Atualizar Status</p>
+          <div class="d-flex flex-column gap-2">
+            <button class="btn fp-btn-modal-acao fp-btn-analisar-modal" (click)="mudarStatus(pedidoDetalhe!, 'em_analise')" [disabled]="pedidoDetalhe!.status === 'em_analise'">🔍 Em Análise</button>
+            <button class="btn fp-btn-modal-acao fp-btn-aprovar-modal" (click)="mudarStatus(pedidoDetalhe!, 'aprovado')" [disabled]="pedidoDetalhe!.status === 'aprovado'">✓ Aprovar Pedido</button>
+            <button class="btn fp-btn-modal-acao fp-btn-cancelar-modal" (click)="mudarStatus(pedidoDetalhe!, 'cancelado')" [disabled]="pedidoDetalhe!.status === 'cancelado'">✗ Cancelar Pedido</button>
+          </div>
+        </div>
+
+        <!-- Link WhatsApp -->
+        <a
+          *ngIf="pedidoDetalhe!.telefoneCliente"
+          class="btn fp-btn-whatsapp mt-3"
+          [href]="gerarLinkWhatsApp(pedidoDetalhe!)"
+          target="_blank"
+        >
+          💬 Contatar no WhatsApp
+        </a>
+      </div>
+
+    </div>
+    <!-- FIM MODAL BODY -->
+
+  </div>
+</div>
+<!-- FIM MODAL -->

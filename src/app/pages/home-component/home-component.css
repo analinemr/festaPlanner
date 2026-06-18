@@ -1,0 +1,831 @@
+/* ============================================================
+   HOME COMPONENT — CSS
+   Paleta: Branco nítido, Prata metálico, Cinza ardósia, Preto
+   Tipografia: Cormorant Garamond (títulos) + DM Sans (corpo)
+   Design: High-end, minimalista, "editorial de revista de moda"
+   ============================================================ */
+
+/* ---- IMPORTAÇÃO DE FONTES GOOGLE ---- */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ---- VARIÁVEIS DE COR (Custom Properties CSS) ----
+   Definidas como variáveis para facilitar manutenção e consistência */
+:root {
+  --branco:       #ffffff;       /* Branco nítido — fundos principais */
+  --prata-claro:  #f0f0f0;       /* Prata claro — fundos secundários */
+  --prata:        #c0c0c0;       /* Prata metálico — bordas e detalhes */
+  --cinza-claro:  #888888;       /* Cinza claro — textos secundários */
+  --cinza:        #444444;       /* Cinza médio — textos de corpo */
+  --cinza-escuro: #1a1a1a;       /* Cinza escuro — fundos dark sections */
+  --preto:        #0a0a0a;       /* Preto profundo — textos principais */
+  --fonte-titulo: 'Cormorant Garamond', serif;  /* Tipografia dos títulos */
+  --fonte-corpo:  'DM Sans', sans-serif;        /* Tipografia dos textos */
+  --nav-height:   80px;          /* Altura da navbar fixa */
+  --transicao:    0.3s ease;     /* Duração padrão de transições */
+}
+
+/* ---- RESET GERAL ---- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--fonte-corpo);
+  color: var(--preto);
+  background: var(--branco);
+  /* Previne scroll horizontal indesejado */
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   NAVEGAÇÃO
+   ============================================================ */
+
+/* Navbar fixa no topo — começa transparente sobre o carrossel */
+.fp-navbar {
+  position: fixed;          /* Fixa no topo mesmo ao rolar a página */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;            /* Fica acima de todos os outros elementos */
+  height: var(--nav-height);
+  background: transparent;  /* Transparente inicial — muda ao rolar */
+  transition: background var(--transicao), box-shadow var(--transicao);
+  padding: 0 1rem;
+}
+
+/* Classe adicionada pelo TypeScript quando scrollY > 60px */
+.fp-navbar.nav-scrolled {
+  background: var(--branco);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+}
+
+/* Logo — ícone estrela + texto */
+.fp-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--branco);     /* Branco sobre o carrossel */
+  transition: color var(--transicao);
+}
+
+/* Quando a navbar tem fundo branco, o logo fica preto */
+.nav-scrolled .fp-logo {
+  color: var(--preto);
+}
+
+/* Ícone estrela ✦ do logo */
+.fp-logo-icon {
+  font-size: 1.4rem;
+  color: var(--prata);
+}
+
+/* Texto do logo */
+.fp-logo-text {
+  font-family: var(--fonte-titulo);
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+/* "Planner" em negrito no logo */
+.fp-logo-text strong {
+  font-weight: 600;
+}
+
+/* Links de navegação */
+.fp-nav-link {
+  color: rgba(255,255,255,0.85) !important;
+  font-family: var(--fonte-corpo);
+  font-size: 0.85rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color var(--transicao);
+  padding: 0.3rem 0 !important;
+  border-bottom: 1px solid transparent;
+}
+
+/* Link de navegação quando a navbar tem fundo */
+.nav-scrolled .fp-nav-link {
+  color: var(--cinza) !important;
+}
+
+/* Hover e estado ativo dos links */
+.fp-nav-link:hover,
+.fp-nav-link.active {
+  color: var(--branco) !important;
+  border-bottom-color: var(--prata);
+}
+
+.nav-scrolled .fp-nav-link:hover,
+.nav-scrolled .fp-nav-link.active {
+  color: var(--preto) !important;
+}
+
+/* Ícone hamburguer no mobile */
+.fp-hamburger-icon {
+  color: var(--branco);
+  font-size: 1.3rem;
+}
+
+.nav-scrolled .fp-hamburger-icon {
+  color: var(--preto);
+}
+
+/* ============================================================
+   BOTÕES
+   ============================================================ */
+
+/* Botão CTA da navbar — "Orçamento" */
+.fp-btn-cta {
+  background: var(--preto);
+  color: var(--branco) !important;
+  border: 1px solid var(--prata);
+  font-family: var(--fonte-corpo);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 10px 24px;
+  border-radius: 0;
+  text-decoration: none;
+  transition: all var(--transicao);
+}
+
+.fp-btn-cta:hover {
+  background: var(--prata);
+  color: var(--preto) !important;
+}
+
+/* Botão primário — principal chamada para ação */
+.fp-btn-primary {
+  background: var(--branco);
+  color: var(--preto) !important;
+  border: none;
+  font-family: var(--fonte-corpo);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 36px;
+  border-radius: 0;
+  text-decoration: none;
+  transition: all var(--transicao);
+}
+
+.fp-btn-primary:hover {
+  background: var(--prata-claro);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* Botão fantasma — estilo outline sobre fundo escuro */
+.fp-btn-ghost {
+  background: transparent;
+  color: var(--branco) !important;
+  border: 1px solid rgba(255,255,255,0.5);
+  font-family: var(--fonte-corpo);
+  font-size: 0.85rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 36px;
+  border-radius: 0;
+  text-decoration: none;
+  transition: all var(--transicao);
+}
+
+.fp-btn-ghost:hover {
+  border-color: var(--branco);
+  background: rgba(255,255,255,0.1);
+}
+
+/* Modificador de tamanho grande */
+.fp-btn-lg {
+  padding: 18px 48px;
+  font-size: 0.9rem;
+}
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+
+.fp-hero {
+  position: relative;
+  height: 100vh;              /* Ocupa toda a altura da janela */
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Carrossel ocupa todo o fundo do hero */
+.fp-hero-carousel {
+  position: absolute;
+  inset: 0;                   /* Equivale a top/right/bottom/left: 0 */
+  width: 100%;
+  height: 100%;
+}
+
+/* Cada slide do carrossel */
+.fp-slide {
+  height: 100vh;
+  min-height: 600px;
+}
+
+/* Fundo com imagem de festa para cada slide */
+.fp-slide-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Ken Burns effect — zoom suave na imagem */
+  animation: kenBurns 10s ease-in-out infinite alternate;
+}
+
+/* Animação de zoom suave nas fotos */
+@keyframes kenBurns {
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
+}
+
+/* Overlay escuro sobre a imagem para legibilidade do texto */
+.fp-slide-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.3) 0%,
+    rgba(0,0,0,0.5) 60%,
+    rgba(0,0,0,0.7) 100%
+  );
+}
+
+/* Conteúdo central do hero — sobreposto ao carrossel */
+.fp-hero-content {
+  position: relative;
+  z-index: 10;                /* Acima do carrossel e overlay */
+  text-align: center;
+  color: var(--branco);
+  padding: 0 1.5rem;
+  max-width: 800px;
+}
+
+/* Texto pequeno acima do título */
+.fp-hero-eyebrow {
+  font-family: var(--fonte-corpo);
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--prata);
+  margin-bottom: 1.5rem;
+}
+
+/* Título principal do hero */
+.fp-hero-title {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(3rem, 8vw, 6rem);  /* Tamanho responsivo com clamp */
+  font-weight: 300;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  /* Sombra de texto para contraste */
+  text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+}
+
+/* "perfeito" em itálico dentro do título */
+.fp-hero-title em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--prata-claro);
+}
+
+/* Subtítulo descritivo */
+.fp-hero-subtitle {
+  font-family: var(--fonte-corpo);
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-weight: 300;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 2.5rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Indicadores (bolinhas) do carrossel */
+.fp-carousel-indicators [data-bs-target] {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  border: none;
+  margin: 0 4px;
+  transition: all var(--transicao);
+}
+
+.fp-carousel-indicators .active {
+  background: var(--branco);
+  width: 20px;
+  border-radius: 3px;
+}
+
+/* Setas do carrossel */
+.fp-carousel-prev,
+.fp-carousel-next {
+  width: 48px;
+  height: 48px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 0;
+  backdrop-filter: blur(4px);
+  opacity: 1 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transicao);
+}
+
+.fp-carousel-prev:hover,
+.fp-carousel-next:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+.fp-arrow-icon {
+  color: var(--branco);
+  font-size: 1.2rem;
+}
+
+/* ============================================================
+   BARRA DE ESTATÍSTICAS
+   ============================================================ */
+
+.fp-stats-bar {
+  background: var(--preto);
+  padding: 28px 0;
+  border-top: 1px solid rgba(192,192,192,0.15);
+}
+
+/* Número em destaque */
+.fp-stat-num {
+  display: block;
+  font-family: var(--fonte-titulo);
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--branco);
+  letter-spacing: 0.02em;
+}
+
+/* Texto descritivo da stat */
+.fp-stat-label {
+  font-family: var(--fonte-corpo);
+  font-size: 0.72rem;
+  font-weight: 300;
+  color: var(--cinza-claro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* Divisória vertical entre stats */
+.fp-stat-divider {
+  position: absolute;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background: rgba(192,192,192,0.2);
+}
+
+/* ============================================================
+   SEÇÕES GERAIS
+   ============================================================ */
+
+/* Espaçamento padrão de seção */
+.fp-section {
+  padding: 100px 0;
+  background: var(--branco);
+}
+
+/* Seção com fundo escuro */
+.fp-section-dark {
+  background: var(--cinza-escuro);
+  color: var(--branco);
+}
+
+/* Cabeçalho de seção */
+.fp-section-header {
+  margin-bottom: 4rem;
+}
+
+/* Texto pequeno acima do título de seção */
+.fp-eyebrow {
+  font-family: var(--fonte-corpo);
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--prata);
+  margin-bottom: 1rem;
+}
+
+/* Título principal de seção */
+.fp-section-title {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--preto);
+}
+
+/* Cor do título em seção escura */
+.fp-section-dark .fp-section-title {
+  color: var(--branco);
+}
+
+/* Texto em itálico dentro dos títulos de seção */
+.fp-section-title em {
+  font-style: italic;
+  color: var(--cinza-claro);
+}
+
+.fp-section-dark .fp-section-title em {
+  color: var(--prata);
+}
+
+/* ============================================================
+   GRID DE CATEGORIAS
+   ============================================================ */
+
+/* Card de categoria de evento */
+.fp-event-card {
+  position: relative;
+  height: 280px;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--transicao);
+  text-decoration: none;
+  display: block;
+}
+
+.fp-event-card:hover {
+  transform: scale(1.02);
+}
+
+/* Overlay do card de evento */
+.fp-event-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%);
+  transition: background var(--transicao);
+}
+
+.fp-event-card:hover .fp-event-overlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 100%);
+}
+
+/* Conteúdo de texto sobre a imagem */
+.fp-event-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  color: var(--branco);
+}
+
+.fp-event-title {
+  font-family: var(--fonte-titulo);
+  font-size: 1.5rem;
+  font-weight: 300;
+  margin-bottom: 4px;
+}
+
+.fp-event-desc {
+  font-family: var(--fonte-corpo);
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  color: var(--prata);
+  margin: 0;
+}
+
+/* ============================================================
+   CARROSSEL HORIZONTAL DE TEMAS
+   ============================================================ */
+
+/* Wrapper com position relative para as setas absolutas */
+.fp-themes-wrapper {
+  position: relative;
+  padding: 0 48px;            /* Espaço para as setas nas laterais */
+}
+
+/* Faixa de scroll horizontal */
+.fp-themes-track {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;   /* Scroll suave ao usar as setas */
+  padding-bottom: 1rem;
+  /* Remove a barra de scroll nativa */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.fp-themes-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* Cada card de tema no carrossel */
+.fp-theme-card {
+  flex: 0 0 260px;            /* Largura fixa — não cresce nem encolhe */
+  cursor: pointer;
+  transition: transform var(--transicao);
+}
+
+.fp-theme-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Imagem do tema */
+.fp-theme-img {
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(192,192,192,0.15);
+}
+
+/* Informações do tema */
+.fp-theme-info {
+  padding: 1rem 0.5rem;
+}
+
+.fp-theme-name {
+  font-family: var(--fonte-titulo);
+  font-size: 1.1rem;
+  font-weight: 300;
+  color: var(--branco);
+  margin-bottom: 4px;
+}
+
+.fp-theme-tipo {
+  font-family: var(--fonte-corpo);
+  font-size: 0.72rem;
+  color: var(--prata);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Botões de seta do carrossel de temas */
+.fp-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(192,192,192,0.3);
+  color: var(--branco);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all var(--transicao);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fp-carousel-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.fp-carousel-btn-left  { left: 0; }
+.fp-carousel-btn-right { right: 0; }
+
+/* ============================================================
+   COMO FUNCIONA — Etapas
+   ============================================================ */
+
+/* Card de cada etapa */
+.fp-step-card {
+  padding: 2.5rem 1.5rem;
+  border: 1px solid var(--prata-claro);
+  transition: all var(--transicao);
+}
+
+.fp-step-card:hover {
+  border-color: var(--prata);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+}
+
+/* Número da etapa */
+.fp-step-number {
+  font-family: var(--fonte-titulo);
+  font-size: 3rem;
+  font-weight: 300;
+  color: var(--prata-claro);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+/* Ícone emoji da etapa */
+.fp-step-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Título da etapa */
+.fp-step-title {
+  font-family: var(--fonte-titulo);
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin-bottom: 0.75rem;
+  color: var(--preto);
+}
+
+/* Descrição da etapa */
+.fp-step-desc {
+  font-family: var(--fonte-corpo);
+  font-size: 0.85rem;
+  color: var(--cinza-claro);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ============================================================
+   DEPOIMENTOS
+   ============================================================ */
+
+/* Card de depoimento */
+.fp-testimonial-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(192,192,192,0.15);
+  padding: 2rem;
+  transition: all var(--transicao);
+}
+
+.fp-testimonial-card:hover {
+  border-color: rgba(192,192,192,0.4);
+  background: rgba(255,255,255,0.08);
+}
+
+/* Estrelas de avaliação */
+.fp-stars {
+  color: var(--prata);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+}
+
+/* Texto do depoimento */
+.fp-testimonial-text {
+  font-family: var(--fonte-titulo);
+  font-size: 1rem;
+  font-style: italic;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+
+/* Nome do cliente */
+.fp-testimonial-author strong {
+  font-family: var(--fonte-corpo);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--branco);
+}
+
+/* ============================================================
+   SEÇÃO CTA FINAL
+   ============================================================ */
+
+.fp-cta-section {
+  padding: 120px 0;
+  background: var(--preto);
+  color: var(--branco);
+}
+
+.fp-cta-title {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 300;
+  margin-bottom: 1rem;
+}
+
+.fp-cta-title em {
+  font-style: italic;
+  color: var(--prata);
+}
+
+.fp-cta-subtitle {
+  font-family: var(--fonte-corpo);
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--cinza-claro);
+}
+
+/* Botão primário dentro da seção CTA — cor invertida */
+.fp-cta-section .fp-btn-primary {
+  background: var(--prata);
+  color: var(--preto) !important;
+}
+
+.fp-cta-section .fp-btn-primary:hover {
+  background: var(--branco);
+}
+
+/* ============================================================
+   RODAPÉ
+   ============================================================ */
+
+.fp-footer {
+  background: var(--cinza-escuro);
+  color: var(--cinza-claro);
+  padding: 48px 0 24px;
+  border-top: 1px solid rgba(192,192,192,0.1);
+}
+
+.fp-footer-desc {
+  font-size: 0.8rem;
+  color: var(--cinza-claro);
+  max-width: 360px;
+}
+
+.fp-footer-link {
+  color: var(--cinza-claro);
+  text-decoration: none;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  transition: color var(--transicao);
+}
+
+.fp-footer-link:hover {
+  color: var(--branco);
+}
+
+.fp-footer-copy {
+  border-top: 1px solid rgba(192,192,192,0.1);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+}
+
+/* ============================================================
+   RESPONSIVIDADE — Breakpoints Mobile
+   ============================================================ */
+
+/* Tablets e celulares (< 768px) */
+@media (max-width: 768px) {
+
+  /* Hero menor no mobile */
+  .fp-hero { height: 85vh; min-height: 500px; }
+  .fp-slide { height: 85vh; min-height: 500px; }
+
+  /* Cards de categoria menores */
+  .fp-event-card { height: 200px; }
+
+  /* Seções com menos padding */
+  .fp-section { padding: 60px 0; }
+  .fp-cta-section { padding: 80px 0; }
+
+  /* Carrossel de temas sem padding lateral */
+  .fp-themes-wrapper { padding: 0 44px; }
+}
+
+/* Celulares (< 576px) */
+@media (max-width: 576px) {
+
+  /* Nav colapsa — menu vertical com fundo branco */
+  .navbar-collapse {
+    background: var(--branco);
+    padding: 1.5rem;
+    border-top: 1px solid var(--prata-claro);
+    position: absolute;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+  }
+
+  /* Links no mobile ficam pretos */
+  .fp-nav-link {
+    color: var(--preto) !important;
+    font-size: 1rem;
+    padding: 0.75rem 0 !important;
+    border-bottom: 1px solid var(--prata-claro) !important;
+  }
+
+  .fp-btn-cta {
+    margin-top: 1rem;
+    display: block;
+    text-align: center;
+  }
+}

@@ -1,0 +1,171 @@
+<!--
+  LOGIN COMPONENT — Tela de Autenticação do Administrador
+  Layout: Split-screen — imagem à esquerda, formulário à direita
+  Design: High-end, minimalista, paleta branco/prata/preto
+  Bootstrap 5 + CSS customizado (login-component.css)
+-->
+
+<!-- CONTAINER PRINCIPAL: divide a tela em 2 colunas -->
+<div class="fp-login-wrapper">
+
+  <!-- COLUNA ESQUERDA — Imagem decorativa (oculta no mobile) -->
+  <div class="fp-login-visual d-none d-lg-flex">
+    <!-- Overlay escuro sobre a imagem de fundo -->
+    <div class="fp-login-overlay"></div>
+
+    <!-- Conteúdo sobreposto à imagem -->
+    <div class="fp-login-visual-content">
+      <!-- Logo no canto superior esquerdo -->
+      <div class="fp-login-logo">
+        <span class="fp-logo-icon">✦</span>
+        <span class="fp-logo-text">Festa<strong>Planner</strong></span>
+      </div>
+
+      <!-- Citação central motivadora -->
+      <div class="fp-login-quote">
+        <p class="fp-quote-text">"Cada festa é uma obra de arte."</p>
+        <p class="fp-quote-sub">Painel Administrativo — Área Exclusiva</p>
+      </div>
+    </div>
+  </div>
+  <!-- FIM COLUNA ESQUERDA -->
+
+
+  <!-- COLUNA DIREITA — Formulário de Login -->
+  <div class="fp-login-form-col">
+
+    <!-- Logo visível apenas no mobile (a coluna esquerda está oculta) -->
+    <div class="fp-login-logo-mobile d-flex d-lg-none align-items-center gap-2 mb-5">
+      <span class="fp-logo-icon">✦</span>
+      <span class="fp-logo-text">Festa<strong>Planner</strong></span>
+    </div>
+
+    <!-- CAIXA DO FORMULÁRIO -->
+    <div class="fp-login-box">
+
+      <!-- Cabeçalho do formulário -->
+      <div class="fp-login-header mb-4">
+        <p class="fp-eyebrow">Área Restrita</p>
+        <h1 class="fp-login-title">Bem-vindo de volta</h1>
+        <p class="fp-login-subtitle">Acesse o painel de controle da sua casa de festas.</p>
+      </div>
+
+      <!-- ALERTA DE ERRO — exibido via *ngIf quando erro !== null -->
+      <!-- *ngIf → diretiva Angular que renderiza o elemento somente se a condição for verdadeira -->
+      <div
+        *ngIf="erro"
+        class="alert fp-alert-error d-flex align-items-center gap-2 mb-4"
+        role="alert"
+      >
+        <!-- Ícone de erro -->
+        <span class="fp-alert-icon">⚠</span>
+        <!-- Mensagem de erro vinda do backend Spring Boot -->
+        <span>{{ erro }}</span>
+        <!-- Botão para fechar o alerta — (click) chama método do .ts -->
+        <button type="button" class="btn-close ms-auto" (click)="limparErro()" aria-label="Fechar"></button>
+      </div>
+
+      <!-- FORMULÁRIO DE LOGIN -->
+      <!-- (ngSubmit) → evento Angular acionado ao submeter o form -->
+      <!-- [formGroup] → vincula ao FormGroup definido no .ts (Reactive Forms) -->
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate>
+
+        <!-- CAMPO: E-mail -->
+        <div class="fp-form-group mb-4">
+          <!-- label com for vinculado ao id do input (acessibilidade) -->
+          <label for="email" class="fp-label">E-mail</label>
+
+          <!-- formControlName → vincula o input ao FormControl 'email' do formGroup -->
+          <!-- [class.is-invalid] → adiciona borda vermelha Bootstrap se o campo for inválido e tocado -->
+          <input
+            type="email"
+            id="email"
+            class="form-control fp-input"
+            formControlName="email"
+            placeholder="admin@festaplanner.com.br"
+            autocomplete="email"
+            [class.is-invalid]="campoInvalido('email')"
+          />
+
+          <!-- Mensagem de validação — exibida quando o campo tem erro -->
+          <div class="invalid-feedback fp-validation-msg" *ngIf="campoInvalido('email')">
+            <!-- *ngIf aninhado para exibir mensagem específica por tipo de erro -->
+            <span *ngIf="loginForm.get('email')?.errors?.['required']">E-mail é obrigatório.</span>
+            <span *ngIf="loginForm.get('email')?.errors?.['email']">Informe um e-mail válido.</span>
+          </div>
+        </div>
+        <!-- FIM Campo E-mail -->
+
+        <!-- CAMPO: Senha -->
+        <div class="fp-form-group mb-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <label for="senha" class="fp-label">Senha</label>
+            <!-- Link "Esqueci a senha" — futuramente implementar recuperação -->
+            <a href="#" class="fp-link-esqueceu">Esqueceu a senha?</a>
+          </div>
+
+          <!-- Wrapper para o campo com botão de mostrar/ocultar senha -->
+          <div class="fp-input-wrapper">
+            <!-- [type] alterna entre 'password' e 'text' conforme mostrarSenha -->
+            <!-- [type]="mostrarSenha ? 'text' : 'password'" → binding de atributo Angular -->
+            <input
+              [type]="mostrarSenha ? 'text' : 'password'"
+              id="senha"
+              class="form-control fp-input"
+              formControlName="senha"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              [class.is-invalid]="campoInvalido('senha')"
+            />
+
+            <!-- Botão para alternar visibilidade da senha -->
+            <!-- type="button" é obrigatório para evitar submissão do form -->
+            <button
+              type="button"
+              class="fp-toggle-senha"
+              (click)="alternarSenha()"
+              [attr.aria-label]="mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'"
+            >
+              <!-- Ícone muda conforme o estado -->
+              {{ mostrarSenha ? '🙈' : '👁️' }}
+            </button>
+          </div>
+
+          <div class="invalid-feedback fp-validation-msg" *ngIf="campoInvalido('senha')">
+            <span *ngIf="loginForm.get('senha')?.errors?.['required']">Senha é obrigatória.</span>
+            <span *ngIf="loginForm.get('senha')?.errors?.['minlength']">Mínimo de 6 caracteres.</span>
+          </div>
+        </div>
+        <!-- FIM Campo Senha -->
+
+        <!-- BOTÃO DE SUBMIT -->
+        <!-- [disabled] → desabilita o botão enquanto a requisição está em andamento -->
+        <button
+          type="submit"
+          class="btn fp-btn-login w-100"
+          [disabled]="carregando"
+        >
+          <!-- *ngIf → exibe spinner ou texto conforme o estado de carregamento -->
+          <span *ngIf="carregando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <span *ngIf="!carregando">Entrar no Painel</span>
+          <span *ngIf="carregando">Autenticando...</span>
+        </button>
+
+      </form>
+      <!-- FIM FORMULÁRIO -->
+
+      <!-- Link para voltar à página pública -->
+      <div class="fp-login-footer mt-4 text-center">
+        <a routerLink="/home" class="fp-link-voltar">
+          ← Voltar ao site
+        </a>
+      </div>
+
+    </div>
+    <!-- FIM CAIXA DO FORMULÁRIO -->
+
+  </div>
+  <!-- FIM COLUNA DIREITA -->
+
+</div>
+<!-- FIM WRAPPER PRINCIPAL -->

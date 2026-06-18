@@ -1,0 +1,385 @@
+<!--
+  HOME COMPONENT — Página Principal do Festa Planner
+  Layout: Hero com Carrossel + Stats + Categorias + Temas + Como Funciona + CTA
+  Bootstrap 5 + CSS customizado (home-component.css)
+  Responsivo: mobile-first com breakpoints Bootstrap (sm, md, lg, xl)
+-->
+
+<!-- NAVEGAÇÃO PRINCIPAL -->
+<!-- [class.nav-scrolled] → adiciona classe CSS quando o usuário rola a página (lógica no .ts) -->
+<nav class="navbar navbar-expand-lg fp-navbar" [class.nav-scrolled]="scrolled" id="mainNav">
+  <div class="container-fluid px-4">
+
+    <!-- LOGO — link para a home -->
+    <a class="navbar-brand fp-logo" routerLink="/home">
+      <!-- Ícone decorativo do logo -->
+      <span class="fp-logo-icon">✦</span>
+      <!-- Nome da marca com destaque no "Planner" -->
+      <span class="fp-logo-text">Festa<strong>Planner</strong></span>
+    </a>
+
+    <!-- BOTÃO HAMBURGUER — visível somente no mobile (lg para baixo) -->
+    <!-- data-bs-toggle e data-bs-target são atributos do Bootstrap para o collapse -->
+    <button
+      class="navbar-toggler border-0"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navMenu"
+      aria-controls="navMenu"
+      aria-expanded="false"
+      aria-label="Abrir menu"
+    >
+      <!-- Ícone hamburguer personalizado -->
+      <span class="fp-hamburger-icon">&#9776;</span>
+    </button>
+
+    <!-- MENU DE NAVEGAÇÃO — colapsa no mobile -->
+    <div class="collapse navbar-collapse" id="navMenu">
+      <!-- Links centrais — ms-auto empurra para a direita, me-4 dá espaço antes do botão -->
+      <ul class="navbar-nav ms-auto me-4 gap-lg-3">
+        <!-- routerLink → navegação interna do Angular (sem reload de página) -->
+        <!-- routerLinkActive → adiciona classe 'active' quando a rota está ativa -->
+        <li class="nav-item">
+          <a class="nav-link fp-nav-link" routerLink="/home" routerLinkActive="active">Início</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fp-nav-link" routerLink="/catalogo" routerLinkActive="active">Catálogo</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fp-nav-link" routerLink="/orcamento" routerLinkActive="active">Orçamentos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fp-nav-link" routerLink="/login" routerLinkActive="active">Área Admin</a>
+        </li>
+      </ul>
+
+      <!-- BOTÃO CTA PRINCIPAL — sempre visível, canto superior direito -->
+      <a routerLink="/orcamento" class="btn fp-btn-cta">Orçamento</a>
+    </div>
+
+  </div>
+</nav>
+<!-- FIM NAVEGAÇÃO -->
+
+
+<!-- HERO SECTION — Carrossel de Fotos de Festas de Luxo -->
+<!-- Bootstrap Carousel com ID único para controle via JS -->
+<section class="fp-hero" id="heroSection">
+
+  <!-- Wrapper do carrossel Bootstrap -->
+  <!-- data-bs-ride="carousel" → inicia automaticamente -->
+  <!-- data-bs-interval="5000" → troca de slide a cada 5 segundos -->
+  <div
+    id="heroCarousel"
+    class="carousel slide fp-hero-carousel"
+    data-bs-ride="carousel"
+    data-bs-interval="5000"
+  >
+
+    <!-- INDICADORES DE SLIDE (bolinhas na parte inferior) -->
+    <div class="carousel-indicators fp-carousel-indicators">
+      <!-- data-bs-slide-to="N" → define para qual slide o botão navega -->
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="4" aria-label="Slide 5"></button>
+    </div>
+
+    <!-- SLIDES — cada item é uma foto de festa de luxo -->
+    <!-- *ngFor → diretiva Angular que itera sobre o array de slides definido no .ts -->
+    <div class="carousel-inner">
+      <div
+        *ngFor="let slide of slides; let i = index"
+        class="carousel-item fp-slide"
+        [class.active]="i === 0"
+      >
+        <!-- Imagem de fundo via style binding Angular -->
+        <!-- [style.backgroundImage] → define a imagem de fundo dinamicamente -->
+        <div
+          class="fp-slide-bg"
+          [style.backgroundImage]="'url(' + slide.url + ')'"
+        ></div>
+        <!-- Overlay escuro para contraste com o texto -->
+        <div class="fp-slide-overlay"></div>
+      </div>
+    </div>
+
+    <!-- SETAS DE NAVEGAÇÃO DO CARROSSEL -->
+    <!-- data-bs-slide → controla direção: 'prev' ou 'next' -->
+    <button class="carousel-control-prev fp-carousel-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+      <span class="fp-arrow-icon">&#8592;</span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next fp-carousel-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+      <span class="fp-arrow-icon">&#8594;</span>
+      <span class="visually-hidden">Próximo</span>
+    </button>
+
+  </div>
+  <!-- FIM Carrossel Bootstrap -->
+
+  <!-- CONTEÚDO CENTRAL DO HERO — sobreposto ao carrossel -->
+  <div class="fp-hero-content">
+    <!-- Texto de apresentação acima do título principal -->
+    <p class="fp-hero-eyebrow">Experiências Únicas &nbsp;·&nbsp; Momentos Inesquecíveis</p>
+
+    <!-- Título principal — <em> em itálico para destaque tipográfico -->
+    <h1 class="fp-hero-title">
+      Planeje o evento<br /><em>perfeito</em>
+    </h1>
+
+    <!-- Subtítulo descritivo -->
+    <p class="fp-hero-subtitle">
+      Da ideia ao orçamento em minutos. Casamentos, festas de 15 anos,
+      eventos florais e celebrações infantis de alto padrão.
+    </p>
+
+    <!-- BOTÕES DE AÇÃO DO HERO -->
+    <div class="fp-hero-actions d-flex flex-wrap gap-3 justify-content-center">
+      <!-- Botão primário — leva direto ao orçamento -->
+      <a routerLink="/orcamento" class="btn fp-btn-primary">Criar Orçamento</a>
+      <!-- Botão fantasma — âncora para a seção de categorias abaixo -->
+      <a href="#categorias" class="btn fp-btn-ghost">Explorar Temas</a>
+    </div>
+  </div>
+
+</section>
+<!-- FIM HERO SECTION -->
+
+
+<!-- BARRA DE ESTATÍSTICAS -->
+<!-- d-flex com flex-wrap garante que as stats quebrem linha no mobile -->
+<div class="fp-stats-bar">
+  <div class="container">
+    <div class="row justify-content-center g-3">
+
+      <!-- Cada stat é uma coluna Bootstrap responsiva -->
+      <!-- *ngFor → itera sobre o array de estatísticas definido no .ts -->
+      <div
+        *ngFor="let stat of stats; let last = last"
+        class="col-6 col-md-3"
+      >
+        <div class="fp-stat text-center">
+          <!-- Número em destaque -->
+          <span class="fp-stat-num">{{ stat.numero }}</span>
+          <!-- Descrição abaixo -->
+          <span class="fp-stat-label d-block">{{ stat.label }}</span>
+        </div>
+        <!-- Divisória vertical — oculta no último item e no mobile -->
+        <div class="fp-stat-divider d-none d-md-block" *ngIf="!last"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- FIM STATS BAR -->
+
+
+<!-- SEÇÃO: CATEGORIAS DE EVENTOS -->
+<section class="fp-section" id="categorias">
+  <div class="container">
+
+    <!-- Cabeçalho da seção -->
+    <div class="fp-section-header text-center mb-5">
+      <p class="fp-eyebrow">Categorias</p>
+      <h2 class="fp-section-title">Qual é a <em>celebração?</em></h2>
+    </div>
+
+    <!-- GRID DE CATEGORIAS — 2 colunas mobile, 3 desktop -->
+    <div class="row g-4">
+
+      <!-- *ngFor → itera sobre categorias definidas no .ts -->
+      <div
+        *ngFor="let cat of categorias"
+        class="col-6 col-md-4"
+      >
+        <!-- Card de categoria — link para o orçamento com tipo pré-selecionado -->
+        <!-- [routerLink] e [queryParams] passam parâmetros de URL para o componente destino -->
+        <a
+          class="fp-event-card d-block"
+          [routerLink]="['/orcamento']"
+          [queryParams]="{ tipo: cat.tipo }"
+          [style.backgroundImage]="'url(' + cat.imagem + ')'"
+        >
+          <!-- Overlay escuro sobre a imagem -->
+          <div class="fp-event-overlay"></div>
+          <!-- Texto sobre a imagem -->
+          <div class="fp-event-content">
+            <h3 class="fp-event-title">{{ cat.nome }}</h3>
+            <p class="fp-event-desc">{{ cat.descricao }}</p>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- FIM CATEGORIAS -->
+
+
+<!-- SEÇÃO: TEMAS POPULARES — Carrossel Horizontal -->
+<section class="fp-section fp-section-dark" id="temas">
+  <div class="container">
+
+    <div class="fp-section-header text-center mb-5">
+      <p class="fp-eyebrow">Inspirações</p>
+      <h2 class="fp-section-title">Temas <em>mais desejados</em></h2>
+    </div>
+
+    <!-- WRAPPER DO CARROSSEL HORIZONTAL DE TEMAS -->
+    <!-- position-relative para posicionar as setas absolutamente -->
+    <div class="fp-themes-wrapper position-relative">
+
+      <!-- Seta Esquerda — chama método do .ts para scroll -->
+      <!-- (click) → event binding Angular: chama o método ao clicar -->
+      <button class="fp-carousel-btn fp-carousel-btn-left" (click)="scrollTemas(-1)" aria-label="Temas anteriores">
+        &#8592;
+      </button>
+
+      <!-- FAIXA DE TEMAS — scroll horizontal por CSS -->
+      <!-- #temasTrack → referência de template Angular para acessar o elemento no .ts -->
+      <div class="fp-themes-track" #temasTrack>
+
+        <!-- *ngFor → itera sobre o array de temas definido no .ts -->
+        <div
+          *ngFor="let tema of temas"
+          class="fp-theme-card"
+        >
+          <!-- Imagem do tema com overlay de hover -->
+          <div
+            class="fp-theme-img"
+            [style.backgroundImage]="'url(' + tema.imagem + ')'"
+          ></div>
+          <!-- Nome e tipo do tema -->
+          <div class="fp-theme-info">
+            <h4 class="fp-theme-name">{{ tema.nome }}</h4>
+            <p class="fp-theme-tipo">{{ tema.tipo }}</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Seta Direita -->
+      <button class="fp-carousel-btn fp-carousel-btn-right" (click)="scrollTemas(1)" aria-label="Próximos temas">
+        &#8594;
+      </button>
+
+    </div>
+  </div>
+</section>
+<!-- FIM TEMAS POPULARES -->
+
+
+<!-- SEÇÃO: COMO FUNCIONA — 4 Etapas -->
+<section class="fp-section" id="como-funciona">
+  <div class="container">
+
+    <div class="fp-section-header text-center mb-5">
+      <p class="fp-eyebrow">Processo</p>
+      <h2 class="fp-section-title">Como <em>funciona?</em></h2>
+    </div>
+
+    <!-- GRID DE ETAPAS — 1 coluna mobile, 2 tablet, 4 desktop -->
+    <div class="row g-4 justify-content-center">
+
+      <!-- *ngFor → itera sobre as etapas definidas no .ts -->
+      <div
+        *ngFor="let etapa of etapas; let i = index"
+        class="col-12 col-sm-6 col-lg-3"
+      >
+        <div class="fp-step-card text-center">
+          <!-- Número da etapa em destaque -->
+          <div class="fp-step-number">{{ i + 1 }}</div>
+          <!-- Ícone da etapa -->
+          <div class="fp-step-icon">{{ etapa.icone }}</div>
+          <!-- Título da etapa -->
+          <h4 class="fp-step-title">{{ etapa.titulo }}</h4>
+          <!-- Descrição breve -->
+          <p class="fp-step-desc">{{ etapa.descricao }}</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- FIM COMO FUNCIONA -->
+
+
+<!-- SEÇÃO: DEPOIMENTOS DE CLIENTES -->
+<section class="fp-section fp-section-dark" id="depoimentos">
+  <div class="container">
+
+    <div class="fp-section-header text-center mb-5">
+      <p class="fp-eyebrow">Avaliações</p>
+      <h2 class="fp-section-title">O que dizem <em>nossos clientes</em></h2>
+    </div>
+
+    <!-- GRID DE DEPOIMENTOS — 1 col mobile, 3 desktop -->
+    <div class="row g-4">
+
+      <!-- *ngFor → itera sobre os depoimentos definidos no .ts -->
+      <div
+        *ngFor="let dep of depoimentos"
+        class="col-12 col-md-4"
+      >
+        <div class="fp-testimonial-card">
+          <!-- Estrelas de avaliação -->
+          <div class="fp-stars mb-3">
+            <span *ngFor="let s of [1,2,3,4,5]">★</span>
+          </div>
+          <!-- Texto do depoimento -->
+          <p class="fp-testimonial-text">"{{ dep.texto }}"</p>
+          <!-- Dados do cliente -->
+          <div class="fp-testimonial-author mt-3">
+            <strong>{{ dep.nome }}</strong>
+            <span class="d-block text-muted small">{{ dep.evento }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- FIM DEPOIMENTOS -->
+
+
+<!-- SEÇÃO: CTA FINAL — Chamada para Ação -->
+<section class="fp-cta-section text-center">
+  <div class="container">
+    <h2 class="fp-cta-title">Pronto para criar o evento <em>dos seus sonhos?</em></h2>
+    <p class="fp-cta-subtitle">Monte seu orçamento personalizado em menos de 5 minutos.</p>
+    <!-- Botão grande de conversão -->
+    <a routerLink="/orcamento" class="btn fp-btn-primary fp-btn-lg mt-4">
+      Começar Agora — É Grátis
+    </a>
+  </div>
+</section>
+<!-- FIM CTA FINAL -->
+
+
+<!-- RODAPÉ -->
+<footer class="fp-footer">
+  <div class="container">
+    <div class="row align-items-center">
+      <!-- Logo no rodapé -->
+      <div class="col-12 col-md-6 text-center text-md-start mb-3 mb-md-0">
+        <span class="fp-logo-icon">✦</span>
+        <span class="fp-logo-text">Festa<strong>Planner</strong></span>
+        <p class="fp-footer-desc mt-2">Plataforma de gerenciamento de orçamentos para casas de festas.</p>
+      </div>
+      <!-- Links do rodapé -->
+      <div class="col-12 col-md-6 text-center text-md-end">
+        <a routerLink="/home" class="fp-footer-link me-3">Início</a>
+        <a routerLink="/catalogo" class="fp-footer-link me-3">Catálogo</a>
+        <a routerLink="/orcamento" class="fp-footer-link me-3">Orçamento</a>
+        <a routerLink="/login" class="fp-footer-link">Admin</a>
+      </div>
+    </div>
+    <!-- Copyright -->
+    <div class="fp-footer-copy text-center mt-4">
+      <p class="mb-0">&copy; {{ anoAtual }} Festa Planner. Todos os direitos reservados.</p>
+    </div>
+  </div>
+</footer>
+<!-- FIM RODAPÉ -->

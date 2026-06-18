@@ -1,28 +1,278 @@
-/* MOBILE MENU */
-.mobile-menu {
-  display: none;
-  position: fixed;
-  top: 72px; left: 0; right: 0;
-  background: var(--white);
-  padding: 24px 32px 32px;
-  flex-direction: column;
-  gap: 20px;
-  z-index: 999;
-  box-shadow: var(--shadow);
-  transform: translateY(-10px);
-  opacity: 0;
-  transition: transform var(--transition), opacity var(--transition);
+/* ============================================================
+   HEADER COMPONENT — CSS
+   Fiel ao index.css modelo: carrossel fade, overlay gradiente,
+   animação heroIn, dots, setas, botões primário e ghost.
+   ============================================================ */
+
+:root {
+  --white:        #FFFFFF;
+  --silver:       #C8C8C8;
+  --silver-light: #E8E8E6;
+  --charcoal:     #2D2D2D;
+  --gold:         #C9A96E;
+  --gold-light:   #E8D5A8;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'DM Sans', sans-serif;
+  --transition:   0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
-.mobile-menu.open {
-  display: flex;
-  transform: translateY(0);
+
+/* ============================================================
+   HERO — container principal
+   ============================================================ */
+
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 600px;
+  overflow: hidden;
+}
+
+/* ---- CARROSSEL ---- */
+.hero-carousel {
+  position: absolute;
+  inset: 0;
+}
+
+/* Cada slide ocupa todo o espaço, transição por opacity (fade) */
+.slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+/* Slide ativo — visível */
+.slide.active {
   opacity: 1;
 }
-.mobile-menu a { font-size: 1rem; color: var(--charcoal); }
-.btn-cta-mobile {
-  padding: 12px 24px;
-  background: var(--charcoal);
-  color: var(--white) !important;
-  text-align: center;
+
+/* ---- OVERLAY GRADIENTE ---- */
+/* Exatamente o mesmo gradiente diagonal do index.css modelo */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(10, 10, 10, 0.72) 0%,
+    rgba(10, 10, 10, 0.38) 50%,
+    rgba(10, 10, 10, 0.55) 100%
+  );
+  z-index: 1;
+}
+
+/* ---- CONTEÚDO ---- */
+.hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  max-width: 700px;
+  padding: 0 80px;
+
+  /* Animação de entrada idêntica ao index.css */
+  animation: heroIn 1.2s ease forwards;
+}
+
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Eyebrow — texto pequeno dourado acima do título */
+.hero-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  margin-bottom: 20px;
+}
+
+/* Título principal */
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 7vw, 6rem);
+  font-weight: 300;
+  line-height: 1.05;
+  color: var(--white);
+  margin-bottom: 24px;
+}
+
+/* <em> dentro do título: itálico dourado claro */
+.hero-title em {
+  font-style: italic;
+  color: var(--gold-light);
+}
+
+/* Subtítulo */
+.hero-subtitle {
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.75);
+  max-width: 480px;
+  margin-bottom: 40px;
+}
+
+/* ---- BOTÕES ---- */
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Botão primário — dourado sólido */
+.btn-primary {
+  display: inline-block;
+  padding: 14px 36px;
+  background: var(--gold);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   border-radius: 2px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.btn-primary:hover {
+  background: #b8924a;
+  transform: translateY(-1px);
+}
+
+/* Botão ghost — outline branco transparente */
+.btn-ghost {
+  display: inline-block;
+  padding: 14px 36px;
+  background: transparent;
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 2px;
+  text-decoration: none;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.btn-ghost:hover {
+  border-color: var(--white);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ---- DOTS INDICADORES ---- */
+.carousel-dots {
+  position: absolute;
+  bottom: 32px;
+  left: 80px;
+  display: flex;
+  gap: 10px;
+  z-index: 3;
+}
+
+/* Dot inativo: traço pequeno branco semitransparente */
+.dot {
+  width: 28px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.35);
+  border: none;
+  cursor: pointer;
+  border-radius: 1px;
+  transition: background var(--transition), width var(--transition);
+}
+
+/* Dot ativo: mais largo e opaco */
+.dot.active {
+  background: var(--white);
+  width: 48px;
+}
+
+/* ---- SETAS DE NAVEGAÇÃO ---- */
+.carousel-nav {
+  position: absolute;
+  bottom: 24px;
+  right: 48px;
+  display: flex;
+  gap: 12px;
+  z-index: 3;
+}
+
+.carousel-nav button {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--white);
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 50%;
+  backdrop-filter: blur(8px);
+  transition: background var(--transition);
+}
+
+.carousel-nav button:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .hero-content {
+    padding: 0 24px;
+    max-width: 100%;
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+  }
+
+  .hero-subtitle {
+    font-size: 0.9rem;
+    max-width: 100%;
+  }
+
+  .carousel-dots {
+    left: 24px;
+    bottom: 80px; /* sobe para não sobrepor as setas */
+  }
+
+  .carousel-nav {
+    right: 24px;
+    bottom: 24px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn-primary,
+  .btn-ghost {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    min-height: 500px;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+  }
 }
