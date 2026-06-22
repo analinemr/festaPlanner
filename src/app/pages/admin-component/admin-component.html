@@ -1,543 +1,408 @@
-<!--
-  ADMIN COMPONENT — Painel Administrativo do Festa Planner
-  Layout: Sidebar fixa + Área de conteúdo dinâmica
-  Design: "Fintech de Luxo" — cinza chumbo, prata, preto profundo
-  Bootstrap 5 + CSS customizado (admin-component.css)
-  Integrado com: Agenda, Pedidos, Catálogo e KPIs via Spring Boot
--->
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">✦</span>
+    <div>
+      <span class="logo-text">Festa<strong>Planner</strong></span>
+      <span class="sidebar-role">Administrador</span>
+    </div>
+  </div>
 
-<!-- WRAPPER PRINCIPAL DO PAINEL ADM -->
-<div class="fp-adm-wrapper">
+  <nav class="sidebar-nav">
+    <a class="nav-item" [class.active]="painelAtivo==='dashboard'" (click)="showPanel('dashboard')">
+      <span class="nav-icon">⬛</span>Painel
+    </a>
+    <a class="nav-item" [class.active]="painelAtivo==='pedidos'" (click)="showPanel('pedidos')">
+      <span class="nav-icon">📋</span>Pedidos
+      <span class="badge" *ngIf="totalNovos > 0">{{ totalNovos }}</span>
+    </a>
+    <a class="nav-item" [class.active]="painelAtivo==='agenda'" (click)="showPanel('agenda')">
+      <span class="nav-icon">📅</span>Agenda
+    </a>
+    <a class="nav-item" [class.active]="painelAtivo==='catalogo'" (click)="showPanel('catalogo')">
+      <span class="nav-icon">🗂️</span>Catálogo
+    </a>
+    <a class="nav-item" [class.active]="painelAtivo==='cadastro'" (click)="showPanel('cadastro')">
+      <span class="nav-icon">➕</span>Novo Produto
+    </a>
+    <a class="nav-item" [class.active]="painelAtivo==='relatorios'" (click)="showPanel('relatorios')">
+      <span class="nav-icon">📊</span>Relatórios
+    </a>
+    <a class="nav-item" [class.active]="painelAtivo==='configuracoes'" (click)="showPanel('configuracoes')">
+      <span class="nav-icon">⚙️</span>Configurações
+    </a>
+  </nav>
 
-  <!-- ================================================
-       SIDEBAR FIXA — Navegação lateral
-       ================================================ -->
-  <aside class="fp-sidebar" [class.fechada]="sidebarFechada">
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">{{ inicialUsuario }}</div>
+      <div>
+        <span class="user-name">{{ nomeUsuario }}</span>
+        <span class="user-role">Gestora</span>
+      </div>
+    </div>
+    <a class="btn-logout" (click)="logout()">Sair</a>
+  </div>
+</aside>
 
-    <!-- Logo no topo da sidebar -->
-    <div class="fp-sidebar-brand">
-      <span class="fp-logo-icon">✦</span>
-      <span class="fp-logo-text" *ngIf="!sidebarFechada">Festa<strong>Planner</strong></span>
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 class="topbar-title">{{ tituloPainel }}</h1>
+      <p class="topbar-date">{{ dataAtual }}</p>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" placeholder="Buscar pedido, cliente..." [(ngModel)]="termoBusca" />
+      </div>
+      <button class="notif-btn" title="Notificações">🔔<span class="notif-dot"></span></button>
+    </div>
+  </div>
+
+  <!-- ======================== DASHBOARD ======================== -->
+  <div class="panel" [class.active]="painelAtivo==='dashboard'">
+
+    <div class="kpi-grid">
+      <div class="kpi-card" *ngFor="let kpi of kpis">
+        <div class="kpi-icon" [ngClass]="kpi.cor">●</div>
+        <div><span class="kpi-val">{{ kpi.valor }}</span><span class="kpi-label">{{ kpi.label }}</span></div>
+      </div>
     </div>
 
-    <!-- NAVEGAÇÃO DA SIDEBAR -->
-    <nav class="fp-sidebar-nav">
-      <!-- *ngFor → itera sobre os itens de menu definidos no .ts -->
-      <button
-        *ngFor="let item of menuItems"
-        class="fp-nav-item"
-        [class.ativo]="secaoAtiva === item.id"
-        (click)="navegarPara(item.id)"
-        [title]="item.nome"
-      >
-        <!-- Ícone do menu -->
-        <span class="fp-nav-icone">{{ item.icone }}</span>
-        <!-- Nome — oculto quando sidebar está fechada -->
-        <span class="fp-nav-nome" *ngIf="!sidebarFechada">{{ item.nome }}</span>
-        <!-- Badge de contagem (ex: pedidos pendentes) -->
-        <span class="fp-nav-badge" *ngIf="item.badge && !sidebarFechada">{{ item.badge }}</span>
-      </button>
-    </nav>
+    <div class="dashboard-grid">
 
-    <!-- Rodapé da sidebar: usuário logado + logout -->
-    <div class="fp-sidebar-footer">
-      <div class="fp-user-info" *ngIf="!sidebarFechada">
-        <div class="fp-user-avatar">{{ inicialUsuario }}</div>
-        <div class="fp-user-dados">
-          <p class="fp-user-nome">{{ nomeUsuario }}</p>
-          <p class="fp-user-perfil">Administrador</p>
+      <!-- Solicitações Pendentes -->
+      <div class="card card-wide">
+        <div class="card-header">
+          <h3 class="card-title">Solicitações Pendentes</h3>
+          <button class="card-action" (click)="showPanel('pedidos')">Ver todos →</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Nº</th><th>Cliente</th><th>Evento</th><th>Data</th><th>Valor Est.</th><th>Status</th><th>Ações</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of pedidosRecentes">
+              <td>#{{ p.num }}</td>
+              <td><strong>{{ p.client }}</strong></td>
+              <td>{{ p.event }} · {{ p.guests }} conv.</td>
+              <td>{{ p.date }}</td>
+              <td>R$ {{ p.value.toLocaleString('pt-BR') }}</td>
+              <td><span class="status-badge" [ngClass]="statusClass(p.status)">{{ p.status }}</span></td>
+              <td class="actions-cell">
+                <button class="action-btn view" (click)="openModal(p)" title="Ver detalhes">👁</button>
+                <button class="action-btn approve" (click)="changeStatus(p,'Confirmado')" title="Confirmar">✓</button>
+                <button class="action-btn reject" (click)="changeStatus(p,'Rejeitado')" title="Rejeitar">✕</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mini Calendário -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Agenda — {{ mesLabel }}</h3>
+          <div class="cal-nav">
+            <button (click)="changeMonth(-1)">‹</button>
+            <button (click)="changeMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="mini-calendar">
+          <div *ngFor="let d of diasSemana" class="cal-day-header">{{ d }}</div>
+          <div *ngFor="let cell of cellsMini"
+               class="cal-day"
+               [ngClass]="cell.cls">
+            {{ cell.num }}
+          </div>
+        </div>
+        <div class="cal-legend">
+          <span class="leg confirmed">Confirmado</span>
+          <span class="leg prereserva2">Pré-Reserva</span>
+          <span class="leg available">Disponível</span>
+        </div>
+        <a href="https://calendar.google.com" target="_blank" class="btn-gcal">Abrir Google Agenda →</a>
+      </div>
+
+      <!-- Gráfico de Barras -->
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Receita Mensal</h3></div>
+        <div class="chart-area">
+          <div *ngFor="let bar of chartData" class="chart-bar-wrap">
+            <div class="chart-bar"
+                 [style.height.%]="bar.pct"
+                 [title]="'R$ ' + (bar.v/1000).toFixed(0) + 'k'"></div>
+            <span class="chart-bar-label">{{ bar.m }}</span>
+          </div>
         </div>
       </div>
-      <!-- Botão de logout — (click) chama método do .ts -->
-      <button class="fp-btn-logout" (click)="logout()" title="Sair">
-        <span>⏻</span>
-        <span *ngIf="!sidebarFechada">Sair</span>
-      </button>
+
+      <!-- Donut -->
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Tipos de Eventos</h3></div>
+        <div class="donut-chart-area">
+          <canvas #donutCanvas width="160" height="160"></canvas>
+          <div class="donut-legend">
+            <div *ngFor="let leg of donutData" class="donut-item">
+              <div class="donut-dot" [style.background]="leg.color"></div>
+              <span>{{ leg.label }} <strong>{{ leg.val }}%</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
+  </div>
 
-  </aside>
-  <!-- FIM SIDEBAR -->
-
-
-  <!-- ================================================
-       ÁREA PRINCIPAL DE CONTEÚDO
-       ================================================ -->
-  <main class="fp-adm-content">
-
-    <!-- TOPBAR — barra superior com título e ações -->
-    <header class="fp-topbar">
-      <!-- Botão para colapsar/expandir a sidebar -->
-      <button class="fp-toggle-sidebar" (click)="alternarSidebar()" aria-label="Abrir/fechar menu">
-        ☰
-      </button>
-      <!-- Título da seção ativa -->
-      <h1 class="fp-topbar-titulo">{{ tituloSecao }}</h1>
-      <!-- Área direita: notificações e avatar -->
-      <div class="fp-topbar-right d-flex align-items-center gap-3">
-        <!-- Botão de notificações -->
-        <button class="fp-btn-notif" title="Notificações">
-          🔔
-          <span class="fp-notif-badge" *ngIf="totalPendentes > 0">{{ totalPendentes }}</span>
-        </button>
-        <!-- Avatar do usuário -->
-        <div class="fp-topbar-avatar" title="{{ nomeUsuario }}">{{ inicialUsuario }}</div>
+  <!-- ======================== PEDIDOS ======================== -->
+  <div class="panel" [class.active]="painelAtivo==='pedidos'">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-header" style="margin-bottom:20px">
+        <h3 class="card-title">Todos os Pedidos</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <select class="filter-sel" (change)="filtrarPorStatus($event)">
+            <option value="">Todos os status</option>
+            <option value="Novo">Novos</option>
+            <option value="Pendente">Pendentes</option>
+            <option value="Pré-Reserva">Pré-Reserva</option>
+            <option value="Confirmado">Confirmados</option>
+          </select>
+          <input type="text" class="filter-sel" placeholder="Buscar cliente..."
+                 [(ngModel)]="termoBusca" (input)="filtrarPedidos()" />
+        </div>
       </div>
-    </header>
-    <!-- FIM TOPBAR -->
+      <table class="data-table">
+        <thead><tr><th>Nº</th><th>Cliente</th><th>Evento</th><th>Data</th><th>Conv.</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let p of pedidosFiltrados">
+            <td>#{{ p.num }}</td>
+            <td><strong>{{ p.client }}</strong></td>
+            <td>{{ p.event }}</td>
+            <td>{{ p.date }}</td>
+            <td>{{ p.guests }} conv.</td>
+            <td>R$ {{ p.value.toLocaleString('pt-BR') }}</td>
+            <td><span class="status-badge" [ngClass]="statusClass(p.status)">{{ p.status }}</span></td>
+            <td class="actions-cell">
+              <button class="action-btn view" (click)="openModal(p)">👁</button>
+              <button class="action-btn approve" (click)="changeStatus(p,'Confirmado')">✓</button>
+              <button class="action-btn reject" (click)="changeStatus(p,'Rejeitado')">✕</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
+  <!-- ======================== AGENDA ======================== -->
+  <div class="panel" [class.active]="painelAtivo==='agenda'">
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header">
+        <h3 class="card-title">Agenda Completa — {{ anoAtual }}</h3>
+        <a href="https://calendar.google.com" target="_blank" class="btn-gcal" style="margin-top:0">📅 Sincronizar Google Agenda</a>
+      </div>
+      <div class="big-calendar">
+        <div *ngFor="let d of diasSemana" class="big-cal-day-header">{{ d }}</div>
+        <div *ngFor="let cell of cellsGrande"
+             class="big-cal-day"
+             [ngClass]="cell.cls">
+          {{ cell.num }}
+          <span class="event-dot" *ngIf="cell.evento">{{ cell.evento }}</span>
+        </div>
+      </div>
+      <div class="cal-legend" style="margin-top:16px">
+        <span class="leg confirmed">Confirmado</span>
+        <span class="leg prereserva2">Pré-Reserva</span>
+        <span class="leg available">Disponível</span>
+        <span class="leg blocked">Bloqueado</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Próximos Eventos</h3></div>
+      <div class="upcoming-list">
+        <div *ngFor="let ev of proximosEventos" class="upcoming-item">
+          <div class="upcoming-date">
+            <div class="day">{{ ev.day }}</div>
+            <div class="mon">{{ ev.mon }}</div>
+          </div>
+          <div class="upcoming-info">
+            <strong>{{ ev.name }}</strong>
+            <span>{{ ev.info }}</span>
+          </div>
+          <span class="status-badge" [ngClass]="ev.cls" style="margin-left:auto">
+            {{ ev.cls === 'confirmed' ? 'Confirmado' : 'Pré-Reserva' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <!-- ================================================
-         SEÇÃO: DASHBOARD (secaoAtiva === 'dashboard')
-         ================================================ -->
-    <section class="fp-section-body" *ngIf="secaoAtiva === 'dashboard'">
+  <!-- ======================== CATÁLOGO ======================== -->
+  <div class="panel" [class.active]="painelAtivo==='catalogo'">
+    <div class="catalog-header-bar">
+      <h3 class="card-title" style="margin:0">Catálogo de Produtos & Serviços</h3>
+      <button class="btn-add-product" (click)="showPanel('cadastro')">+ Novo Produto</button>
+    </div>
+    <div class="catalog-filter-bar">
+      <button *ngFor="let f of filtrosCat"
+              class="cat-filter"
+              [class.active]="filtroCatAtivo===f.val"
+              (click)="filtrarCatalog(f.val)">{{ f.label }}</button>
+    </div>
+    <div class="catalog-grid">
+      <div *ngFor="let p of produtosFiltrados" class="catalog-card">
+        <div class="catalog-card-img" [style.backgroundImage]="bgUrl(p.img)"></div>
+        <div class="catalog-card-body">
+          <span class="catalog-card-cat">{{ p.catLabel }}</span>
+          <h4>{{ p.name }}</h4>
+          <p>{{ p.desc }}</p>
+          <div class="catalog-card-footer">
+            <span class="catalog-price">R$ {{ p.price.toLocaleString('pt-BR') }}</span>
+            <span class="req-tag" *ngIf="p.required">🔒 Obrigatório</span>
+          </div>
+          <div class="catalog-card-actions">
+            <button class="cat-edit-btn">✏ Editar</button>
+            <button class="cat-edit-btn" style="color:#EF4444" (click)="deleteProd(p)">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      <!-- KPIs — Cards de métricas principais -->
-      <div class="row g-4 mb-5">
-        <!-- *ngFor → itera sobre os KPIs definidos no .ts -->
-        <div *ngFor="let kpi of kpis" class="col-6 col-xl-3">
-          <div class="fp-kpi-card">
-            <div class="fp-kpi-icone">{{ kpi.icone }}</div>
-            <div class="fp-kpi-dados">
-              <p class="fp-kpi-valor">{{ kpi.valor }}</p>
-              <p class="fp-kpi-label">{{ kpi.label }}</p>
+  <!-- ======================== CADASTRO ======================== -->
+  <div class="panel" [class.active]="painelAtivo==='cadastro'">
+    <div class="cadastro-layout">
+      <div class="card" style="flex:1">
+        <div class="card-header"><h3 class="card-title">Cadastrar Novo Produto / Serviço</h3></div>
+        <div class="cadastro-form">
+          <div class="form-2col">
+            <div class="form-group">
+              <label>Nome do Produto</label>
+              <input type="text" class="adm-input" placeholder="Ex: Buffet Gourmet Premium"
+                     [(ngModel)]="novoProd.nome" (input)="updatePreview()" />
             </div>
-            <!-- Variação percentual (positiva ou negativa) -->
-            <div class="fp-kpi-variacao" [class.positiva]="kpi.positiva" [class.negativa]="!kpi.positiva">
-              {{ kpi.positiva ? '▲' : '▼' }} {{ kpi.variacao }}
+            <div class="form-group">
+              <label>Categoria</label>
+              <select class="adm-input" [(ngModel)]="novoProd.categoria" (change)="updatePreview()">
+                <option value="Buffet">Buffet</option>
+                <option value="Bolo">Bolo / Confeitaria</option>
+                <option value="Decoração">Decoração</option>
+                <option value="Música">Música & Animação</option>
+                <option value="Foto">Fotografia</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-2col">
+            <div class="form-group">
+              <label>Valor (R$)</label>
+              <input type="number" class="adm-input" placeholder="0,00"
+                     [(ngModel)]="novoProd.preco" (input)="updatePreview()" />
+            </div>
+            <div class="form-group">
+              <label>Tipo de Item</label>
+              <select class="adm-input" [(ngModel)]="novoProd.tipo" (change)="updatePreview()">
+                <option value="obrigatorio">🔒 Obrigatório</option>
+                <option value="opcional">Opcional</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:16px">
+            <label>Descrição</label>
+            <textarea class="adm-input" rows="3"
+                      placeholder="Descreva o produto/serviço com detalhes..."
+                      [(ngModel)]="novoProd.desc" (input)="updatePreview()"></textarea>
+          </div>
+          <div class="form-actions">
+            <button class="btn-save-product" (click)="saveProduct()">✓ Salvar Produto</button>
+            <button class="btn-clear" (click)="clearForm()">Limpar</button>
+          </div>
+          <div class="success-msg" *ngIf="prodSalvo">✓ Produto salvo com sucesso e adicionado ao catálogo!</div>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="card" style="width:280px;flex-shrink:0;align-self:flex-start">
+        <div class="card-header"><h3 class="card-title">Pré-visualização</h3></div>
+        <div class="product-preview">
+          <div class="preview-img" style="background-image:url('https://images.unsplash.com/photo-1555244162-803834f70033?w=400&q=80')"></div>
+          <div class="preview-body">
+            <span class="preview-cat">{{ novoProd.categoria || 'Buffet' }}</span>
+            <h4>{{ novoProd.nome || 'Nome do Produto' }}</h4>
+            <p>{{ novoProd.desc || 'Descrição aparecerá aqui...' }}</p>
+            <div class="preview-footer">
+              <strong>R$ {{ (novoProd.preco || 0).toLocaleString('pt-BR') }}</strong>
+              <span class="req-badge">{{ novoProd.tipo === 'obrigatorio' ? '🔒 Obrigatório' : 'Opcional' }}</span>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- GRÁFICOS -->
-      <div class="row g-4 mb-5">
-
-        <!-- Gráfico de barras mensal — renderizado via canvas no .ts -->
-        <div class="col-12 col-lg-8">
-          <div class="fp-card">
-            <div class="fp-card-header">
-              <h3 class="fp-card-titulo">Faturamento Mensal ({{ anoAtual }})</h3>
-            </div>
-            <div class="fp-card-body">
-              <!-- Canvas onde o Chart.js (ou renderização customizada) desenha o gráfico -->
-              <!-- #graficoBarra → referência de template usada no .ts via @ViewChild -->
-              <canvas #graficoBarra class="fp-canvas-grafico"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- Gráfico donut de tipos de evento -->
-        <div class="col-12 col-lg-4">
-          <div class="fp-card">
-            <div class="fp-card-header">
-              <h3 class="fp-card-titulo">Tipos de Evento</h3>
-            </div>
-            <div class="fp-card-body d-flex flex-column align-items-center">
-              <canvas #graficoDonut class="fp-canvas-donut"></canvas>
-              <!-- Legenda do donut -->
-              <div class="fp-donut-legenda mt-3">
-                <div *ngFor="let leg of legendaDonut" class="fp-legenda-item">
-                  <span class="fp-legenda-cor" [style.backgroundColor]="leg.cor"></span>
-                  <span class="fp-legenda-texto">{{ leg.label }}: {{ leg.valor }}%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- MINI CALENDÁRIO + SOLICITAÇÕES RECENTES -->
-      <div class="row g-4">
-
-        <!-- Mini Calendário -->
-        <div class="col-12 col-lg-4">
-          <div class="fp-card">
-            <div class="fp-card-header d-flex justify-content-between align-items-center">
-              <h3 class="fp-card-titulo">Agenda</h3>
-              <!-- Botão Google Calendar -->
-              <button class="fp-btn-google-cal" (click)="abrirGoogleCalendar()">
-                📅 Google Agenda
-              </button>
-            </div>
-            <div class="fp-card-body">
-              <!-- Navegação do mês no mini calendário -->
-              <div class="fp-cal-nav d-flex justify-content-between align-items-center mb-3">
-                <button class="fp-cal-btn" (click)="mesAnterior()">‹</button>
-                <span class="fp-cal-mes">{{ mesAtualLabel }}</span>
-                <button class="fp-cal-btn" (click)="proximoMes()">›</button>
-              </div>
-              <!-- Grid do calendário -->
-              <div class="fp-mini-cal-grid">
-                <!-- Cabeçalho com dias da semana -->
-                <div *ngFor="let dia of diasSemana" class="fp-cal-dia-label">{{ dia }}</div>
-                <!-- Dias do mês — gerados pelo .ts -->
-                <div
-                  *ngFor="let dia of diasDoMes"
-                  class="fp-cal-dia"
-                  [class.hoje]="dia.hoje"
-                  [class.tem-evento]="dia.temEvento"
-                  [class.outro-mes]="!dia.mesAtual"
-                  (click)="dia.temEvento && verEventosDia(dia.data)"
-                >
-                  {{ dia.numero }}
-                  <!-- Indicador de evento -->
-                  <span class="fp-cal-dot" *ngIf="dia.temEvento"></span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Solicitações Recentes (funil de vendas) -->
-        <div class="col-12 col-lg-8">
-          <div class="fp-card">
-            <div class="fp-card-header d-flex justify-content-between align-items-center">
-              <h3 class="fp-card-titulo">Solicitações Recentes</h3>
-              <button class="fp-btn-link" (click)="navegarPara('pedidos')">Ver todos →</button>
-            </div>
-            <div class="fp-card-body p-0">
-              <!-- Tabela de solicitações recentes -->
-              <div class="fp-table-wrapper">
-                <table class="fp-table w-100">
-                  <thead>
-                    <tr>
-                      <th>Cliente</th>
-                      <th>Evento</th>
-                      <th>Data</th>
-                      <th>Valor</th>
-                      <th>Status</th>
-                      <th>Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <!-- *ngFor → itera sobre pedidos recentes -->
-                    <tr *ngFor="let pedido of pedidosRecentes">
-                      <td>
-                        <div class="fp-table-cliente">
-                          <div class="fp-table-avatar">{{ pedido.nomeCliente[0] }}</div>
-                          <div>
-                            <p class="fp-table-nome">{{ pedido.nomeCliente }}</p>
-                            <p class="fp-table-email">{{ pedido.emailCliente }}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{{ pedido.tipoEvento | titlecase }}</td>
-                      <td>{{ pedido.dataEvento | date:'dd/MM/yyyy' }}</td>
-                      <td>{{ pedido.valorTotal | currency:'BRL':'symbol':'1.0-0' }}</td>
-                      <td>
-                        <!-- Badge de status com cor dinâmica -->
-                        <span class="fp-badge-status" [class]="'status-' + pedido.status">
-                          {{ traduzirStatus(pedido.status) }}
-                        </span>
-                      </td>
-                      <td>
-                        <div class="d-flex gap-2">
-                          <button class="fp-btn-acao" (click)="abrirPedido(pedido)" title="Ver detalhes">👁</button>
-                          <button class="fp-btn-acao fp-btn-aprovar" (click)="aprovarPedido(pedido)" title="Aprovar" *ngIf="pedido.status === 'novo'">✓</button>
-                        </div>
-                      </td>
-                    </tr>
-                    <!-- Mensagem quando não há pedidos -->
-                    <tr *ngIf="pedidosRecentes.length === 0">
-                      <td colspan="6" class="text-center py-4 fp-table-vazio">Nenhuma solicitação encontrada.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-    <!-- FIM DASHBOARD -->
-
-
-    <!-- ================================================
-         SEÇÃO: CADASTRO DE PRODUTOS/SERVIÇOS
-         ================================================ -->
-    <section class="fp-section-body" *ngIf="secaoAtiva === 'cadastro'">
-
-      <div class="fp-section-header mb-4">
-        <p class="fp-eyebrow">Gestão de Catálogo</p>
-        <h2 class="fp-page-title">Cadastro de <em>Produtos & Serviços</em></h2>
-      </div>
-
-      <div class="row g-4">
-
-        <!-- Formulário de cadastro -->
-        <div class="col-12 col-lg-6">
-          <div class="fp-card">
-            <div class="fp-card-header">
-              <h3 class="fp-card-titulo">{{ editandoItem ? 'Editar' : 'Novo' }} Produto / Serviço</h3>
-            </div>
-            <div class="fp-card-body">
-
-              <!-- [formGroup] vincula ao FormGroup do .ts -->
-              <form [formGroup]="cadastroForm" (ngSubmit)="salvarItem()" novalidate>
-
-                <!-- Nome do produto -->
-                <div class="fp-form-group mb-3">
-                  <label class="fp-label">Nome do Produto / Serviço *</label>
-                  <input type="text" class="fp-input form-control" formControlName="nome" placeholder="Ex: Buffet Executivo" [class.is-invalid]="campoInvalido(cadastroForm, 'nome')" />
-                  <div class="invalid-feedback">Nome é obrigatório.</div>
-                </div>
-
-                <!-- Categoria + Preço lado a lado -->
-                <div class="row g-3 mb-3">
-                  <div class="col-6">
-                    <label class="fp-label">Categoria *</label>
-                    <!-- select vinculado ao FormControl -->
-                    <select class="fp-input form-select" formControlName="categoria" [class.is-invalid]="campoInvalido(cadastroForm, 'categoria')">
-                      <option value="">Selecionar...</option>
-                      <option value="buffet">Buffet & Gastronomia</option>
-                      <option value="bolo">Bolo & Doces</option>
-                      <option value="decoracao">Decoração & Flores</option>
-                      <option value="musica">Música & Entretenimento</option>
-                      <option value="foto">Foto & Vídeo</option>
-                      <option value="outro">Outros</option>
-                    </select>
-                    <div class="invalid-feedback">Selecione uma categoria.</div>
-                  </div>
-                  <div class="col-6">
-                    <label class="fp-label">Preço (R$) *</label>
-                    <input type="number" class="fp-input form-control" formControlName="preco" placeholder="0,00" min="0" step="0.01" [class.is-invalid]="campoInvalido(cadastroForm, 'preco')" />
-                    <div class="invalid-feedback">Informe um preço válido.</div>
-                  </div>
-                </div>
-
-                <!-- Descrição -->
-                <div class="fp-form-group mb-3">
-                  <label class="fp-label">Descrição *</label>
-                  <textarea class="fp-input form-control" formControlName="descricao" rows="3" placeholder="Descreva detalhes do produto ou serviço..." [class.is-invalid]="campoInvalido(cadastroForm, 'descricao')"></textarea>
-                  <div class="invalid-feedback">Descrição é obrigatória.</div>
-                </div>
-
-                <!-- Switches de configuração -->
-                <div class="d-flex gap-4 mb-4">
-                  <!-- Obrigatório — itens que não podem ser desmarcados no orçamento -->
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" formControlName="obrigatorio" id="chkObrigatorio" />
-                    <label class="form-check-label fp-label" for="chkObrigatorio">Obrigatório</label>
-                  </div>
-                  <!-- Ativo — itens inativos não aparecem no catálogo público -->
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" formControlName="ativo" id="chkAtivo" />
-                    <label class="form-check-label fp-label" for="chkAtivo">Ativo</label>
-                  </div>
-                </div>
-
-                <!-- Upload de imagem -->
-                <div class="fp-form-group mb-4">
-                  <label class="fp-label">Foto do Produto</label>
-                  <!-- (change) captura o arquivo selecionado — chama método do .ts -->
-                  <input type="file" class="fp-input-file" accept="image/*" (change)="onImagemSelecionada($event)" id="inputImagem" />
-                  <label for="inputImagem" class="fp-label-file">
-                    <span>📎</span>
-                    <span>{{ nomeArquivo || 'Clique para selecionar uma imagem' }}</span>
-                  </label>
-                </div>
-
-                <!-- Botões de ação do formulário -->
-                <div class="d-flex gap-3">
-                  <button type="submit" class="btn fp-btn-salvar" [disabled]="salvando || cadastroForm.invalid">
-                    <span *ngIf="salvando" class="spinner-border spinner-border-sm me-2"></span>
-                    {{ salvando ? 'Salvando...' : (editandoItem ? 'Salvar Alterações' : 'Cadastrar Produto') }}
-                  </button>
-                  <button type="button" class="btn fp-btn-cancelar" *ngIf="editandoItem" (click)="cancelarEdicao()">
-                    Cancelar
-                  </button>
-                </div>
-
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- Preview do item + lista de cadastrados -->
-        <div class="col-12 col-lg-6">
-
-          <!-- Preview em tempo real -->
-          <div class="fp-card mb-4" *ngIf="previewImagem">
-            <div class="fp-card-header"><h3 class="fp-card-titulo">Preview</h3></div>
-            <div class="fp-card-body">
-              <div class="fp-preview-card">
-                <div class="fp-preview-img" [style.backgroundImage]="'url(' + previewImagem + ')'"></div>
-                <div class="fp-preview-info">
-                  <h4 class="fp-preview-nome">{{ cadastroForm.get('nome')?.value || 'Nome do Produto' }}</h4>
-                  <p class="fp-preview-cat">{{ cadastroForm.get('categoria')?.value | titlecase }}</p>
-                  <p class="fp-preview-preco">{{ (cadastroForm.get('preco')?.value || 0) | currency:'BRL':'symbol':'1.2-2' }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Lista de itens cadastrados -->
-          <div class="fp-card">
-            <div class="fp-card-header">
-              <h3 class="fp-card-titulo">Catálogo Atual ({{ itensCatalogo.length }} itens)</h3>
-            </div>
-            <div class="fp-card-body p-0">
-              <div class="fp-lista-itens">
-                <div *ngFor="let item of itensCatalogo" class="fp-lista-item d-flex align-items-center gap-3">
-                  <!-- Miniatura -->
-                  <div class="fp-lista-img" [style.backgroundImage]="'url(' + item.imagemUrl + ')'"></div>
-                  <!-- Dados -->
-                  <div class="flex-grow-1">
-                    <p class="fp-lista-nome">{{ item.nome }}</p>
-                    <p class="fp-lista-cat">{{ item.categoria | titlecase }} · {{ item.preco | currency:'BRL':'symbol':'1.0-0' }}</p>
-                  </div>
-                  <!-- Badges -->
-                  <span class="fp-badge-mini" *ngIf="item.obrigatorio">🔒</span>
-                  <span class="fp-badge-inativo" *ngIf="!item.ativo">Inativo</span>
-                  <!-- Ações -->
-                  <div class="d-flex gap-1">
-                    <button class="fp-btn-acao" (click)="editarItem(item)" title="Editar">✏️</button>
-                    <button class="fp-btn-acao fp-btn-excluir" (click)="excluirItem(item.id!)" title="Excluir">🗑️</button>
-                  </div>
-                </div>
-                <div *ngIf="itensCatalogo.length === 0" class="text-center py-4 fp-table-vazio">
-                  Nenhum item cadastrado ainda.
-                </div>
-              </div>
-            </div>
-          </div>
-
+  <!-- ======================== RELATÓRIOS ======================== -->
+  <div class="panel" [class.active]="painelAtivo==='relatorios'">
+    <div class="kpi-grid" style="margin-bottom:32px">
+      <div class="kpi-card"><div class="kpi-icon green">●</div><div><span class="kpi-val">R$ 284.600</span><span class="kpi-label">Receita Total 2026</span></div></div>
+      <div class="kpi-card"><div class="kpi-icon blue">●</div><div><span class="kpi-val">47</span><span class="kpi-label">Eventos Realizados</span></div></div>
+      <div class="kpi-card"><div class="kpi-icon yellow">●</div><div><span class="kpi-val">R$ 6.055</span><span class="kpi-label">Ticket Médio</span></div></div>
+      <div class="kpi-card"><div class="kpi-icon silver">●</div><div><span class="kpi-val">94%</span><span class="kpi-label">Taxa de Conversão</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Receita por Tipo de Evento (2026)</h3></div>
+      <div class="bar-report">
+        <div *ngFor="let b of barReport" class="report-bar-wrap">
+          <div class="report-bar-val">{{ b.val }}</div>
+          <div class="report-bar" [style.height.%]="b.pct" [style.background]="b.color"></div>
+          <div class="report-bar-label">{{ b.label }}</div>
         </div>
       </div>
-    </section>
-    <!-- FIM CADASTRO -->
+    </div>
+  </div>
 
-
-    <!-- ================================================
-         SEÇÃO: PEDIDOS
-         ================================================ -->
-    <section class="fp-section-body" *ngIf="secaoAtiva === 'pedidos'">
-
-      <div class="fp-section-header mb-4">
-        <p class="fp-eyebrow">Gestão Comercial</p>
-        <h2 class="fp-page-title">Solicitações de <em>Orçamento</em></h2>
-      </div>
-
-      <!-- Filtros da tabela de pedidos -->
-      <div class="fp-filtros-bar d-flex flex-wrap gap-3 mb-4">
-        <!-- Busca por nome -->
-        <input type="text" class="fp-input fp-filtro-busca" placeholder="Buscar por cliente ou evento..." [(ngModel)]="termoBusca" (input)="filtrarPedidos()" />
-
-        <!-- Filtro por status -->
-        <select class="fp-input fp-filtro-select" [(ngModel)]="filtroStatus" (change)="filtrarPedidos()">
-          <option value="">Todos os status</option>
-          <option value="novo">Novo</option>
-          <option value="em_analise">Em Análise</option>
-          <option value="aprovado">Aprovado</option>
-          <option value="cancelado">Cancelado</option>
-        </select>
-      </div>
-
-      <!-- Tabela completa de pedidos -->
-      <div class="fp-card">
-        <div class="fp-card-body p-0">
-          <div class="fp-table-wrapper">
-            <table class="fp-table w-100">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Cliente</th>
-                  <th>Evento</th>
-                  <th>Data do Evento</th>
-                  <th>Convidados</th>
-                  <th>Valor Total</th>
-                  <th>Status</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let pedido of pedidosFiltrados">
-                  <td class="fp-table-id">#{{ pedido.id }}</td>
-                  <td>
-                    <p class="fp-table-nome">{{ pedido.nomeCliente }}</p>
-                    <p class="fp-table-email">{{ pedido.emailCliente }}</p>
-                  </td>
-                  <td>{{ pedido.tipoEvento | titlecase }}</td>
-                  <td>{{ pedido.dataEvento | date:'dd/MM/yyyy' }}</td>
-                  <td>{{ pedido.numeroConvidados }}</td>
-                  <td>{{ pedido.valorTotal | currency:'BRL':'symbol':'1.0-0' }}</td>
-                  <td>
-                    <span class="fp-badge-status" [class]="'status-' + pedido.status">
-                      {{ traduzirStatus(pedido.status) }}
-                    </span>
-                  </td>
-                  <td>
-                    <div class="d-flex gap-2">
-                      <button class="fp-btn-acao" title="Detalhes" (click)="abrirPedido(pedido)">👁</button>
-                      <button class="fp-btn-acao fp-btn-aprovar" title="Aprovar" (click)="mudarStatus(pedido, 'aprovado')" *ngIf="pedido.status !== 'aprovado' && pedido.status !== 'cancelado'">✓</button>
-                      <button class="fp-btn-acao fp-btn-excluir" title="Cancelar" (click)="mudarStatus(pedido, 'cancelado')" *ngIf="pedido.status !== 'cancelado'">✗</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr *ngIf="pedidosFiltrados.length === 0">
-                  <td colspan="8" class="text-center py-4 fp-table-vazio">Nenhum pedido encontrado.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+  <!-- ======================== CONFIGURAÇÕES ======================== -->
+  <div class="panel" [class.active]="painelAtivo==='configuracoes'">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Configurações da Plataforma</h3></div>
+      <div class="settings-form">
+        <div class="form-group"><label>Nome da Casa de Festas</label><input type="text" class="adm-input" value="Festa Planner — Espaço Premium" /></div>
+        <div class="form-group"><label>E-mail de contato</label><input type="email" class="adm-input" value="contato@festaplannerrj.com.br" /></div>
+        <div class="form-group"><label>WhatsApp / Telefone</label><input type="tel" class="adm-input" value="(21) 99999-0000" /></div>
+        <div class="form-group"><label>Taxa de serviço (%)</label><input type="number" class="adm-input" value="5" /></div>
+        <div class="form-group">
+          <label>Integração Google Calendar</label>
+          <a href="https://calendar.google.com" target="_blank" class="btn-gcal" style="display:inline-block;margin-top:4px">📅 Conectar Google Agenda</a>
         </div>
+        <button class="btn-save-product" style="margin-top:12px">Salvar Configurações</button>
       </div>
-    </section>
-    <!-- FIM PEDIDOS -->
+    </div>
+  </div>
 
+</main>
 
-    <!-- ================================================
-         SEÇÃO: AGENDA COMPLETA
-         ================================================ -->
-    <section class="fp-section-body" *ngIf="secaoAtiva === 'agenda'">
-
-      <div class="fp-section-header mb-4 d-flex justify-content-between align-items-end">
-        <div>
-          <p class="fp-eyebrow">Calendário de Eventos</p>
-          <h2 class="fp-page-title">Agenda <em>Completa</em></h2>
-        </div>
-        <button class="btn fp-btn-google-cal-lg" (click)="abrirGoogleCalendar()">
-          📅 Sincronizar Google Agenda
-        </button>
-      </div>
-
-      <!-- Calendário completo — navegação de mês -->
-      <div class="fp-card">
-        <div class="fp-card-header d-flex justify-content-between align-items-center">
-          <button class="fp-cal-btn" (click)="mesAnterior()">‹ Mês anterior</button>
-          <h3 class="fp-card-titulo">{{ mesAtualLabel }} {{ anoAtual }}</h3>
-          <button class="fp-cal-btn" (click)="proximoMes()">Próximo mês ›</button>
-        </div>
-        <div class="fp-card-body">
-          <!-- Grid de 7 colunas para o calendário completo -->
-          <div class="fp-cal-completo-grid">
-            <!-- Dias da semana -->
-            <div *ngFor="let d of diasSemanaCompletos" class="fp-cal-completo-header">{{ d }}</div>
-            <!-- Células dos dias -->
-            <div
-              *ngFor="let dia of diasDoMes"
-              class="fp-cal-completo-dia"
-              [class.hoje]="dia.hoje"
-              [class.tem-evento]="dia.temEvento"
-              [class.outro-mes]="!dia.mesAtual"
-              (click)="dia.temEvento && verEventosDia(dia.data)"
-            >
-              <span class="fp-cal-numero">{{ dia.numero }}</span>
-              <!-- Evento do dia (mini card) -->
-              <div *ngIf="dia.temEvento && dia.evento" class="fp-cal-evento-mini">
-                {{ dia.evento.titulo }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- FIM AGENDA -->
-
-  </main>
-  <!-- FIM ÁREA PRINCIPAL -->
-
+<!-- MODAL DE PEDIDO -->
+<div class="modal-overlay" [class.open]="modalAberto" (click)="fecharModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()" *ngIf="pedidoModal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:300">Pedido #{{ pedidoModal.num }}</h3>
+      <button (click)="fecharModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--slate)">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div><label style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-dark);display:block;margin-bottom:4px">Cliente</label><strong>{{ pedidoModal.client }}</strong></div>
+      <div><label style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-dark);display:block;margin-bottom:4px">Evento</label>{{ pedidoModal.event }}</div>
+      <div><label style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-dark);display:block;margin-bottom:4px">Data</label>{{ pedidoModal.date }}</div>
+      <div><label style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-dark);display:block;margin-bottom:4px">Convidados</label>{{ pedidoModal.guests }} pessoas</div>
+    </div>
+    <div style="background:var(--off-white);padding:16px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <span style="font-size:.85rem;color:var(--slate)">Valor estimado</span>
+      <strong style="font-family:var(--font-display);font-size:1.4rem">R$ {{ pedidoModal.value.toLocaleString('pt-BR') }}</strong>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button (click)="fecharModal()" style="flex:1;padding:12px;border:1px solid var(--silver);border-radius:4px;background:none;cursor:pointer;font-family:var(--font-body);font-size:.82rem">Fechar</button>
+      <button (click)="changeStatus(pedidoModal,'Confirmado');fecharModal()" style="flex:1;padding:12px;background:#D1FAE5;color:#065F46;border:none;border-radius:4px;cursor:pointer;font-family:var(--font-body);font-size:.82rem;font-weight:500">✓ Confirmar</button>
+    </div>
+  </div>
 </div>
-<!-- FIM WRAPPER PAINEL ADM -->

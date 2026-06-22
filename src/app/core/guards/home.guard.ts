@@ -8,14 +8,13 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 
+/** Redireciona admin já logado de /login para /admin */
 export const homeGuard: CanActivateFn = () => {
   const router = inject(Router);
   const token = localStorage.getItem('fp_token');
-
   if (token) {
     router.navigate(['/admin']);
     return false;
   }
-
   return true;
 };

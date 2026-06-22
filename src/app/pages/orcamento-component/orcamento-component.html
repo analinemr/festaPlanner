@@ -1,413 +1,305 @@
-<!--
-  ORÇAMENTO COMPONENT — Montagem de Orçamento
-  Layout: Split-screen — Painel de seleção (esquerda) + Aside flutuante (direita)
-  Design: High-end, GlassMorphism no aside, carrosséis por categoria
-  Bootstrap 5 + CSS customizado (orcamento-component.css)
-  Integração: Dados de itens via CatalogoService (Spring Boot)
--->
-
-<!-- NAVEGAÇÃO — mesma navbar da home, sem transparência -->
-<nav class="navbar navbar-expand-lg fp-navbar fp-navbar-solid">
-  <div class="container-fluid px-4">
-    <a class="navbar-brand fp-logo" routerLink="/home">
-      <span class="fp-logo-icon">✦</span>
-      <span class="fp-logo-text">Festa<strong>Planner</strong></span>
-    </a>
-    <ul class="navbar-nav ms-auto">
-      <li class="nav-item"><a class="nav-link fp-nav-link-dark" routerLink="/home">Início</a></li>
-      <li class="nav-item"><a class="nav-link fp-nav-link-dark" routerLink="/catalogo">Catálogo</a></li>
-    </ul>
-    <a routerLink="/login" class="btn fp-btn-cta-dark ms-3">Área Admin</a>
-  </div>
+<!-- NAV (sempre sólida na página de orçamento) -->
+<nav class="nav">
+  <a routerLink="/home" class="nav-logo">
+    <span class="logo-icon">✦</span>
+    <span class="logo-text">Festa<strong>Planner</strong></span>
+  </a>
+  <ul class="nav-links">
+    <li><a routerLink="/home">Início</a></li>
+    <li><a routerLink="/orcamento" class="active">Meus Orçamentos</a></li>
+    <li><a href="#">Mensagens</a></li>
+    <li><a href="#">Conta</a></li>
+  </ul>
+  <a routerLink="/login" class="btn-adm">Área ADM</a>
 </nav>
 
-<!-- LAYOUT SPLIT-SCREEN PRINCIPAL -->
-<div class="fp-app-layout">
+<!-- LAYOUT SPLIT -->
+<div class="app-layout">
 
-  <!-- ================================================
-       PAINEL ESQUERDO: Seleção de Itens
-       ================================================ -->
-  <main class="fp-selection-panel">
+  <!-- PAINEL DE SELEÇÃO (esquerda) -->
+  <div class="selection-panel">
 
-    <!-- BARRA DE PROGRESSO DO WIZARD em 4 etapas -->
-    <div class="fp-progress-bar-wrapper">
-      <div class="fp-progress-steps">
-        <!-- *ngFor → itera sobre as etapas do wizard -->
-        <div
-          *ngFor="let etapa of etapasWizard; let i = index"
-          class="fp-progress-step"
-          [class.ativo]="i === etapaAtual"
-          [class.concluido]="i < etapaAtual"
-        >
-          <!-- Círculo numerado da etapa -->
-          <div class="fp-step-circle">
-            <!-- Ícone de check se concluído, número se não -->
-            <span *ngIf="i < etapaAtual">✓</span>
-            <span *ngIf="i >= etapaAtual">{{ i + 1 }}</span>
-          </div>
-          <!-- Label da etapa -->
-          <span class="fp-step-label">{{ etapa }}</span>
+    <!-- BARRA DE PROGRESSO -->
+    <div class="progress-bar-wrap">
+      <div class="progress-steps">
+        <div *ngFor="let step of etapas; let i = index"
+             class="pstep"
+             [class.active]="etapaAtual === i + 1"
+             [class.done]="etapaAtual > i + 1">
+          <span>{{ i + 1 }}</span>{{ step }}
         </div>
       </div>
-      <!-- Linha de progresso preenchida conforme avanço -->
-      <div class="fp-progress-line">
-        <!-- Largura calculada proporcionalmente ao avanço -->
-        <div
-          class="fp-progress-fill"
-          [style.width.%]="(etapaAtual / (etapasWizard.length - 1)) * 100"
-        ></div>
+      <div class="progress-line">
+        <div class="progress-fill" [style.width.%]="(etapaAtual / 4) * 100"></div>
       </div>
     </div>
-    <!-- FIM Barra de Progresso -->
 
-
-    <!-- ================================================
-         ETAPA 0: DADOS DO EVENTO
-         *ngIf → exibe somente quando etapaAtual === 0
-         ================================================ -->
-    <div class="fp-step-content" *ngIf="etapaAtual === 0">
-
-      <div class="fp-section-header mb-5">
-        <p class="fp-eyebrow">Etapa 1 de 4</p>
-        <h2 class="fp-step-title">Dados do <em>Evento</em></h2>
-        <p class="fp-step-subtitle">Conte-nos sobre a celebração que você está planejando.</p>
+    <!-- ============================================================
+         ETAPA 1: TIPO DE EVENTO
+         ============================================================ -->
+    <div class="step-section" [class.active]="etapaAtual === 1" id="step1">
+      <div class="step-header">
+        <h2 class="step-title">Qual é o <em>tipo de evento?</em></h2>
+        <p class="step-desc">Selecione a categoria e configure os dados principais da sua festa.</p>
       </div>
 
-      <!-- Formulário reativo para os dados do evento -->
-      <form [formGroup]="dadosEventoForm" class="fp-evento-form">
+      <!-- Tipo de evento -->
+      <p class="filter-label" style="margin-bottom:12px">TIPO DE EVENTO</p>
+      <div class="event-type-grid">
+        <button *ngFor="let tipo of tiposEvento"
+                class="event-type-btn"
+                [class.active]="tipoSelecionado === tipo.valor"
+                (click)="selecionarTipo(tipo.valor)">
+          <span class="event-icon">{{ tipo.icone }}</span>
+          {{ tipo.nome }}
+        </button>
+      </div>
 
-        <!-- Tipo do evento — Radio buttons como cards visuais -->
-        <div class="mb-5">
-          <label class="fp-label mb-3">Tipo de Evento</label>
-          <div class="row g-3">
-            <!-- *ngFor → itera sobre os tipos de evento disponíveis -->
-            <div *ngFor="let tipo of tiposEvento" class="col-6 col-md-4">
-              <!-- Card selecionável via radio button -->
-              <label class="fp-radio-card" [class.selecionado]="dadosEventoForm.get('tipoEvento')?.value === tipo.valor">
-                <!-- Input radio oculto — vinculado ao FormControl -->
-                <input
-                  type="radio"
-                  formControlName="tipoEvento"
-                  [value]="tipo.valor"
-                  class="visually-hidden"
-                />
-                <span class="fp-radio-icon">{{ tipo.icone }}</span>
-                <span class="fp-radio-label">{{ tipo.nome }}</span>
-              </label>
+      <!-- Dados do cliente -->
+      <div class="form-row">
+        <div class="filter-group">
+          <label class="filter-label">DATA DO EVENTO</label>
+          <input type="date" class="filter-input" [(ngModel)]="dadosForm.dataEvento" [min]="dataMinima" />
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Nº DE CONVIDADOS</label>
+          <div class="guest-selector">
+            <button (click)="ajustarConvidados(-10)">−</button>
+            <input type="number" [(ngModel)]="dadosForm.convidados" min="20" max="1000" />
+            <button (click)="ajustarConvidados(10)">+</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">FAIXA DE PREÇO</label>
+          <select class="filter-input" [(ngModel)]="dadosForm.faixaPreco">
+            <option value="medio">Médio (R$ 5k–R$ 15k)</option>
+            <option value="premium">Premium (R$ 15k–R$ 40k)</option>
+            <option value="luxo">Luxo (R$ 40k+)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-next" (click)="avancarEtapa()">Próximo: Escolher Tema →</button>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         ETAPA 2: TEMA
+         ============================================================ -->
+    <div class="step-section" [class.active]="etapaAtual === 2" id="step2">
+      <div class="step-header">
+        <h2 class="step-title">Escolha o <em>tema da festa</em></h2>
+        <p class="step-desc">Navegue pelos temas e clique para selecionar o seu favorito.</p>
+      </div>
+
+      <p class="filter-label" style="margin-bottom:16px">TEMAS POPULARES</p>
+      <div class="themes-carousel-wrapper" style="position:relative;margin-bottom:32px">
+        <button class="carousel-btn left" style="left:-16px" (click)="shiftTemas(-1)">&#8592;</button>
+        <div style="overflow:hidden">
+          <div class="themes-track" #temasTrack2 style="transition:transform 0.4s ease">
+            <div *ngFor="let tema of temas"
+                 class="theme-item"
+                 [class.selected]="temaSelecionado === tema.nome"
+                 [attr.data-price]="tema.preco"
+                 (click)="selecionarTema(tema)">
+              <div class="theme-img" [style.backgroundImage]="'url(' + tema.imagem + ')'"></div>
+              <h4>{{ tema.nome }}</h4>
+              <p>{{ tema.tipo }}</p>
+              <p style="font-size:.85rem;font-weight:500;color:var(--charcoal);margin-top:4px">
+                R$ {{ tema.preco.toLocaleString('pt-BR') }}
+              </p>
             </div>
           </div>
         </div>
+        <button class="carousel-btn right" style="right:-16px" (click)="shiftTemas(1)">&#8594;</button>
+      </div>
 
-        <!-- Grid de campos do formulário -->
-        <div class="row g-4">
-
-          <!-- Nome do cliente -->
-          <div class="col-12 col-md-6">
-            <label class="fp-label">Seu Nome Completo</label>
-            <input type="text" class="fp-input form-control" formControlName="nomeCliente" placeholder="Ana Silva" [class.is-invalid]="campoInvalido(dadosEventoForm, 'nomeCliente')" />
-            <div class="invalid-feedback" *ngIf="campoInvalido(dadosEventoForm, 'nomeCliente')">Nome é obrigatório.</div>
-          </div>
-
-          <!-- E-mail -->
-          <div class="col-12 col-md-6">
-            <label class="fp-label">E-mail</label>
-            <input type="email" class="fp-input form-control" formControlName="emailCliente" placeholder="ana@email.com" [class.is-invalid]="campoInvalido(dadosEventoForm, 'emailCliente')" />
-            <div class="invalid-feedback" *ngIf="campoInvalido(dadosEventoForm, 'emailCliente')">Informe um e-mail válido.</div>
-          </div>
-
-          <!-- Telefone -->
-          <div class="col-12 col-md-6">
-            <label class="fp-label">WhatsApp / Telefone</label>
-            <input type="tel" class="fp-input form-control" formControlName="telefoneCliente" placeholder="(21) 99999-9999" />
-          </div>
-
-          <!-- Data do evento -->
-          <div class="col-12 col-md-6">
-            <label class="fp-label">Data Desejada</label>
-            <input type="date" class="fp-input form-control" formControlName="dataEvento" [min]="dataMinima" [class.is-invalid]="campoInvalido(dadosEventoForm, 'dataEvento')" />
-            <div class="invalid-feedback" *ngIf="campoInvalido(dadosEventoForm, 'dataEvento')">Selecione uma data futura.</div>
-          </div>
-
-          <!-- Número de convidados -->
-          <div class="col-12 col-md-6">
-            <label class="fp-label">Número de Convidados</label>
-            <input type="number" class="fp-input form-control" formControlName="numeroConvidados" placeholder="150" min="10" max="1000" />
-          </div>
-
-          <!-- Observações -->
-          <div class="col-12">
-            <label class="fp-label">Observações (opcional)</label>
-            <textarea class="fp-input form-control fp-textarea" formControlName="observacoes" placeholder="Conte mais sobre suas preferências..." rows="3"></textarea>
-          </div>
-
-        </div>
-
-        <!-- Botão avançar -->
-        <div class="fp-step-actions mt-5">
-          <button type="button" class="btn fp-btn-avancar" (click)="avancarEtapa()" [disabled]="dadosEventoForm.invalid">
-            Próximo: Escolher Serviços →
-          </button>
-        </div>
-
-      </form>
+      <div class="step-nav">
+        <button class="btn-back" (click)="voltarEtapa()">← Voltar</button>
+        <button class="btn-next" (click)="avancarEtapa()">Próximo: Serviços →</button>
+      </div>
     </div>
-    <!-- FIM ETAPA 0 -->
 
-
-    <!-- ================================================
-         ETAPA 1: SELEÇÃO DE ITENS (Carrosséis por Categoria)
-         ================================================ -->
-    <div class="fp-step-content" *ngIf="etapaAtual === 1">
-
-      <div class="fp-section-header mb-5">
-        <p class="fp-eyebrow">Etapa 2 de 4</p>
-        <h2 class="fp-step-title">Monte seu <em>Pacote</em></h2>
-        <p class="fp-step-subtitle">Selecione os serviços e produtos para seu evento.</p>
+    <!-- ============================================================
+         ETAPA 3: SERVIÇOS (carrosséis por categoria)
+         ============================================================ -->
+    <div class="step-section" [class.active]="etapaAtual === 3" id="step3">
+      <div class="step-header">
+        <h2 class="step-title">Monte seu <em>pacote de serviços</em></h2>
+        <p class="step-desc">Selecione os itens desejados. Itens marcados com 🔒 são obrigatórios.</p>
       </div>
 
-      <!-- Loading enquanto carrega do Spring Boot -->
-      <div *ngIf="carregandoItens" class="text-center py-5">
-        <div class="spinner-border" role="status" style="color: var(--prata)"></div>
-        <p class="mt-3 fp-step-subtitle">Carregando catálogo...</p>
-      </div>
-
-      <!-- CATEGORIAS COM CARROSSÉIS -->
-      <div *ngIf="!carregandoItens">
-        <div *ngFor="let categoria of categoriasFiltradas" class="fp-categoria-section mb-5">
-
-          <!-- Cabeçalho da categoria -->
-          <div class="fp-categoria-header d-flex align-items-center gap-3 mb-3">
-            <span class="fp-categoria-icone">{{ categoria.icone }}</span>
-            <div>
-              <h3 class="fp-categoria-titulo">{{ categoria.nome }}</h3>
-              <!-- Destaque para itens obrigatórios -->
-              <span class="fp-badge-obrigatorio" *ngIf="categoria.obrigatorio">Obrigatório</span>
-            </div>
+      <!-- Bloco por categoria -->
+      <div *ngFor="let cat of categorias" class="service-carousel-block">
+        <div class="service-carousel-header">
+          <span class="carousel-label">{{ cat.icone }} {{ cat.nome }}</span>
+          <div class="carousel-controls">
+            <button class="carr-btn" (click)="shiftCarousel(cat.id, -1)">&#8592;</button>
+            <button class="carr-btn" (click)="shiftCarousel(cat.id, 1)">&#8594;</button>
           </div>
-
-          <!-- CARROSSEL HORIZONTAL DA CATEGORIA -->
-          <div class="fp-itens-track-wrapper position-relative">
-
-            <button class="fp-carousel-btn-sm fp-btn-sm-left" (click)="scrollCategoria(categoria.id, -1)">‹</button>
-
-            <!-- Track com scroll horizontal -->
-            <!-- [id] dinâmico para referenciar no scroll via JS -->
-            <div class="fp-itens-track" [id]="'track-' + categoria.id">
-
-              <!-- Card de cada item do catálogo -->
-              <!-- *ngFor → itera sobre os itens da categoria -->
-              <div
-                *ngFor="let item of categoria.itens"
-                class="fp-item-card"
-                [class.selecionado]="itemSelecionado(item.id!)"
-                [class.obrigatorio]="item.obrigatorio"
-                (click)="toggleItem(item)"
-              >
-                <!-- Imagem do item vinda do Spring Boot -->
-                <div class="fp-item-img" [style.backgroundImage]="'url(' + item.imagemUrl + ')'">
-                  <!-- Overlay de seleção -->
-                  <div class="fp-item-overlay" *ngIf="itemSelecionado(item.id!)">
-                    <span class="fp-check-icon">✓</span>
-                  </div>
-                  <!-- Badge "obrigatório" sobre a imagem -->
-                  <span class="fp-badge-lock" *ngIf="item.obrigatorio">🔒</span>
-                </div>
-                <!-- Informações do item -->
-                <div class="fp-item-info">
-                  <h4 class="fp-item-nome">{{ item.nome }}</h4>
-                  <p class="fp-item-desc">{{ item.descricao }}</p>
-                  <p class="fp-item-preco">{{ item.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
-                </div>
+        </div>
+        <div class="service-carousel-viewport" [id]="cat.id + '-viewport'">
+          <div class="service-carousel-track" [id]="cat.id + '-track'">
+            <div *ngFor="let item of cat.itens"
+                 class="service-item"
+                 [class.selected]="isSelected(item)"
+                 [attr.data-required]="item.obrigatorio"
+                 (click)="toggleItem(item)">
+              <div class="service-img" [style.backgroundImage]="'url(' + item.imagem + ')'"></div>
+              <div class="select-check">✓</div>
+              <div class="service-info">
+                <h4>{{ item.nome }}{{ item.obrigatorio ? ' 🔒' : '' }}</h4>
+                <p>{{ item.desc }}</p>
+                <span class="service-price">R$ {{ item.preco.toLocaleString('pt-BR') }}</span>
               </div>
-
             </div>
-
-            <button class="fp-carousel-btn-sm fp-btn-sm-right" (click)="scrollCategoria(categoria.id, 1)">›</button>
           </div>
-          <!-- FIM CARROSSEL -->
-
         </div>
       </div>
-      <!-- FIM CATEGORIAS -->
 
-      <!-- Botões de navegação do wizard -->
-      <div class="fp-step-actions mt-5 d-flex gap-3">
-        <button type="button" class="btn fp-btn-voltar" (click)="voltarEtapa()">← Voltar</button>
-        <button type="button" class="btn fp-btn-avancar" (click)="avancarEtapa()" [disabled]="itensSelecionados.length === 0">
-          Próximo: Revisar Orçamento →
-        </button>
+      <div class="step-nav">
+        <button class="btn-back" (click)="voltarEtapa()">← Voltar</button>
+        <button class="btn-next" (click)="avancarEtapa()">Próximo: Confirmar →</button>
       </div>
-
     </div>
-    <!-- FIM ETAPA 1 -->
 
-
-    <!-- ================================================
-         ETAPA 2: REVISÃO DO ORÇAMENTO
-         ================================================ -->
-    <div class="fp-step-content" *ngIf="etapaAtual === 2">
-
-      <div class="fp-section-header mb-5">
-        <p class="fp-eyebrow">Etapa 3 de 4</p>
-        <h2 class="fp-step-title">Revise seu <em>Orçamento</em></h2>
-        <p class="fp-step-subtitle">Confirme os itens selecionados antes de enviar.</p>
+    <!-- ============================================================
+         ETAPA 4: CONFIRMAÇÃO
+         ============================================================ -->
+    <div class="step-section" [class.active]="etapaAtual === 4" id="step4">
+      <div class="step-header">
+        <h2 class="step-title">Confirme e <em>envie o pedido</em></h2>
+        <p class="step-desc">Preencha seus dados de contato e finalize o orçamento.</p>
       </div>
 
-      <!-- Lista dos itens selecionados -->
-      <div class="fp-revisao-lista">
-        <div
-          *ngFor="let item of itensSelecionadosCompletos"
-          class="fp-revisao-item d-flex align-items-center gap-3"
-        >
-          <!-- Miniatura do item -->
-          <div class="fp-revisao-img" [style.backgroundImage]="'url(' + item.imagemUrl + ')'"></div>
-          <!-- Dados do item -->
-          <div class="flex-grow-1">
-            <p class="fp-revisao-nome mb-0">{{ item.nome }}</p>
-            <p class="fp-revisao-cat mb-0">{{ item.categoria | titlecase }}</p>
+      <div class="confirm-form">
+        <div class="form-row">
+          <div class="filter-group">
+            <label class="filter-label">NOME COMPLETO</label>
+            <input type="text" class="filter-input" [(ngModel)]="dadosForm.nome" placeholder="Seu nome completo" />
           </div>
-          <!-- Preço à direita -->
-          <p class="fp-revisao-preco mb-0">{{ item.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
-          <!-- Botão remover (desabilitado para obrigatórios) -->
-          <button
-            class="fp-btn-remover"
-            (click)="removerItem(item.id!)"
-            [disabled]="item.obrigatorio"
-            [title]="item.obrigatorio ? 'Item obrigatório' : 'Remover item'"
-          >
-            {{ item.obrigatorio ? '🔒' : '×' }}
-          </button>
+          <div class="filter-group">
+            <label class="filter-label">E-MAIL</label>
+            <input type="email" class="filter-input" [(ngModel)]="dadosForm.email" placeholder="seu@email.com" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="filter-group">
+            <label class="filter-label">WHATSAPP</label>
+            <input type="tel" class="filter-input" [(ngModel)]="dadosForm.whatsapp" placeholder="(21) 99999-0000" />
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">MELHOR HORÁRIO PARA CONTATO</label>
+            <select class="filter-input" [(ngModel)]="dadosForm.horario">
+              <option>Manhã (8h–12h)</option>
+              <option>Tarde (12h–18h)</option>
+              <option>Noite (18h–21h)</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-group" style="margin-bottom:24px">
+          <label class="filter-label">OBSERVAÇÕES ADICIONAIS</label>
+          <textarea class="filter-input" rows="4" [(ngModel)]="dadosForm.observacoes"
+                    placeholder="Alguma preferência especial, necessidade de acessibilidade, restrições alimentares..."></textarea>
+        </div>
+
+        <!-- Resumo do pedido -->
+        <div class="confirm-summary" id="confirmSummary">
+          <h4 style="font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-dark);margin-bottom:12px;">Resumo do Pedido</h4>
+          <p style="font-size:.85rem;color:var(--slate);margin-bottom:4px;">
+            <strong>{{ tipoSelecionado | titlecase }}</strong> · {{ dadosForm.convidados }} convidados
+          </p>
+          <p style="font-size:.82rem;color:var(--slate)" *ngIf="temaSelecionado">Tema: {{ temaSelecionado }}</p>
+          <div style="margin:12px 0;padding:12px 0;border-top:1px solid var(--silver-light);border-bottom:1px solid var(--silver-light)">
+            <div *ngFor="let item of itensSelecionados" style="display:flex;justify-content:space-between;font-size:.8rem;padding:3px 0">
+              <span>{{ item.nome }}</span>
+              <span>R$ {{ item.preco.toLocaleString('pt-BR') }}</span>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.92rem;font-weight:600;color:var(--charcoal)">
+            <span>Total Estimado</span>
+            <span>{{ totalFormatado }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Totalizador na revisão -->
-      <div class="fp-revisao-total mt-4">
-        <div class="d-flex justify-content-between mb-2">
-          <span class="fp-total-label">Subtotal</span>
-          <span class="fp-total-valor">{{ subtotal | currency:'BRL':'symbol':'1.2-2' }}</span>
-        </div>
-        <div class="d-flex justify-content-between mb-2">
-          <span class="fp-total-label">Taxa de serviço (5%)</span>
-          <span class="fp-total-valor">{{ taxaServico | currency:'BRL':'symbol':'1.2-2' }}</span>
-        </div>
-        <div class="d-flex justify-content-between fp-total-final">
-          <span>Total</span>
-          <span>{{ total | currency:'BRL':'symbol':'1.2-2' }}</span>
-        </div>
-      </div>
-
-      <div class="fp-step-actions mt-5 d-flex gap-3">
-        <button type="button" class="btn fp-btn-voltar" (click)="voltarEtapa()">← Voltar</button>
-        <button type="button" class="btn fp-btn-avancar" (click)="avancarEtapa()">
-          Confirmar e Enviar →
+      <div class="step-nav">
+        <button class="btn-back" (click)="voltarEtapa()">← Voltar</button>
+        <button class="btn-submit" (click)="enviarPedido()" [disabled]="enviando">
+          {{ enviando ? 'Enviando...' : '✓ Enviar Orçamento' }}
         </button>
       </div>
     </div>
-    <!-- FIM ETAPA 2 -->
+
+  </div>
+  <!-- FIM PAINEL SELEÇÃO -->
 
 
-    <!-- ================================================
-         ETAPA 3: CONFIRMAÇÃO / SUCESSO
-         ================================================ -->
-    <div class="fp-step-content fp-sucesso" *ngIf="etapaAtual === 3">
-      <div class="text-center">
-        <!-- Ícone de sucesso -->
-        <div class="fp-sucesso-icon">✓</div>
-        <h2 class="fp-step-title mt-4">Orçamento <em>Enviado!</em></h2>
-        <p class="fp-step-subtitle mt-3">
-          Seu orçamento foi recebido com sucesso.<br />
-          Nossa equipe entrará em contato em até 24h pelo e-mail <strong>{{ dadosEventoForm.get('emailCliente')?.value }}</strong>.
+  <!-- BUDGET ASIDE (sidebar direita fixa) -->
+  <aside class="budget-aside">
+    <div class="budget-aside-inner">
+
+      <div class="budget-header">
+        <span class="budget-eyebrow">Resumo</span>
+        <h3 class="budget-title">Seu Orçamento</h3>
+        <p class="budget-meta" id="budgetMeta">
+          {{ tipoSelecionado || 'Casamento' }} · {{ dadosForm.convidados }} convidados
         </p>
-        <!-- Número do pedido retornado pelo Spring Boot -->
-        <div class="fp-numero-pedido mt-4" *ngIf="numeroPedido">
-          <p class="fp-eyebrow">Número do pedido</p>
-          <p class="fp-pedido-num">#{{ numeroPedido }}</p>
-        </div>
-        <a routerLink="/home" class="btn fp-btn-avancar mt-4 d-inline-block">Voltar ao Início</a>
       </div>
-    </div>
-    <!-- FIM ETAPA 3 -->
 
-  </main>
-  <!-- FIM PAINEL DE SELEÇÃO -->
+      <!-- Itens selecionados -->
+      <div class="budget-items">
+        <div *ngIf="itensSelecionados.length === 0" class="budget-empty">
+          Nenhum item selecionado ainda.
+        </div>
+        <div *ngFor="let item of itensSelecionados" class="budget-line-item">
+          <span class="budget-item-name" [class.required]="item.obrigatorio">
+            {{ item.nome }}{{ item.obrigatorio ? ' 🔒' : '' }}
+          </span>
+          <span class="budget-item-price">R$ {{ item.preco.toLocaleString('pt-BR', {minimumFractionDigits:2}) }}</span>
+          <button *ngIf="!item.obrigatorio" class="budget-item-remove" (click)="removerItem(item)" title="Remover">✕</button>
+        </div>
+      </div>
 
+      <!-- Totais -->
+      <div class="budget-total-block">
+        <div class="budget-total-row">
+          <span>Subtotal</span>
+          <span id="subtotalVal">{{ subtotalFormatado }}</span>
+        </div>
+        <div class="budget-total-row tax">
+          <span>Taxa de serviço (5%)</span>
+          <span id="taxVal">{{ taxaFormatada }}</span>
+        </div>
+        <div class="budget-total-row grand">
+          <span>Total Estimado</span>
+          <span class="total-price" id="totalVal">{{ totalFormatado }}</span>
+        </div>
+      </div>
 
-  <!-- ================================================
-       ASIDE FLUTUANTE: Resumo do Orçamento (GlassMorphism)
-       Visível a partir da etapa 1 (seleção de itens)
-       ================================================ -->
-  <aside class="fp-budget-aside" *ngIf="etapaAtual >= 1 && etapaAtual < 3">
+      <!-- Botões -->
+      <div class="budget-cta">
+        <button class="btn-save-budget" (click)="salvarRascunho()">💾 Salvar rascunho</button>
+        <button class="btn-send-budget" (click)="irParaConfirmacao()">Finalizar →</button>
+      </div>
 
-    <!-- Cabeçalho do aside -->
-    <div class="fp-aside-header">
-      <h3 class="fp-aside-title">Resumo do Orçamento</h3>
-      <span class="fp-aside-badge">{{ itensSelecionados.length }} itens</span>
-    </div>
-
-    <!-- Dados do evento (da etapa 0) -->
-    <div class="fp-aside-evento mb-4" *ngIf="dadosEventoForm.get('tipoEvento')?.value">
-      <p class="fp-aside-label">Evento</p>
-      <p class="fp-aside-valor">{{ dadosEventoForm.get('tipoEvento')?.value | titlecase }}</p>
-      <p class="fp-aside-label mt-2" *ngIf="dadosEventoForm.get('dataEvento')?.value">Data</p>
-      <p class="fp-aside-valor" *ngIf="dadosEventoForm.get('dataEvento')?.value">
-        {{ dadosEventoForm.get('dataEvento')?.value | date:'dd/MM/yyyy' }}
+      <p class="budget-disclaimer">
+        * Valores estimados. O preço final pode variar após confirmação com a casa de festas.
       </p>
     </div>
-
-    <!-- Lista de itens selecionados no aside -->
-    <div class="fp-aside-itens">
-      <!-- Mensagem quando não há itens -->
-      <p class="fp-aside-vazio" *ngIf="itensSelecionados.length === 0">
-        Selecione os serviços ao lado para montar seu orçamento.
-      </p>
-
-      <!-- *ngFor → lista os itens selecionados no aside -->
-      <div
-        *ngFor="let item of itensSelecionadosCompletos"
-        class="fp-aside-item d-flex justify-content-between align-items-start"
-      >
-        <div class="flex-grow-1">
-          <p class="fp-aside-item-nome mb-0">{{ item.nome }}</p>
-          <p class="fp-aside-item-cat mb-0">{{ item.categoria | titlecase }}</p>
-        </div>
-        <span class="fp-aside-item-preco">{{ item.preco | currency:'BRL':'symbol':'1.0-0' }}</span>
-      </div>
-    </div>
-
-    <!-- Separador -->
-    <div class="fp-aside-divider"></div>
-
-    <!-- Totais calculados em tempo real -->
-    <div class="fp-aside-totais">
-      <!-- subtotal e total são calculados pelo .ts e atualizados automaticamente -->
-      <div class="d-flex justify-content-between mb-2">
-        <span class="fp-aside-label">Subtotal</span>
-        <span class="fp-aside-label">{{ subtotal | currency:'BRL':'symbol':'1.2-2' }}</span>
-      </div>
-      <div class="d-flex justify-content-between mb-3">
-        <span class="fp-aside-label">Taxa (5%)</span>
-        <span class="fp-aside-label">{{ taxaServico | currency:'BRL':'symbol':'1.2-2' }}</span>
-      </div>
-      <div class="d-flex justify-content-between fp-aside-total-final">
-        <strong>Total</strong>
-        <!-- Animação de atualização do preço em tempo real -->
-        <strong class="fp-total-animado">{{ total | currency:'BRL':'symbol':'1.2-2' }}</strong>
-      </div>
-    </div>
-
-    <!-- Botão de envio rápido do aside (na etapa de revisão) -->
-    <button
-      *ngIf="etapaAtual === 2"
-      class="btn fp-btn-enviar w-100 mt-4"
-      (click)="enviarOrcamento()"
-      [disabled]="enviando"
-    >
-      <span *ngIf="enviando" class="spinner-border spinner-border-sm me-2"></span>
-      {{ enviando ? 'Enviando...' : 'Enviar Orçamento' }}
-    </button>
-
   </aside>
-  <!-- FIM ASIDE -->
 
 </div>
-<!-- FIM LAYOUT SPLIT -->
+
+<!-- MODAL DE SUCESSO -->
+<div class="modal-overlay" [class.open]="modalAberto">
+  <div class="modal">
+    <span class="modal-icon">✦</span>
+    <h3>Orçamento Enviado!</h3>
+    <p>Recebemos sua solicitação. A casa de festas entrará em contato em até 24 horas para confirmar a disponibilidade de data e os detalhes do evento.</p>
+    <p class="modal-ref" *ngIf="numeroPedido"><strong>Nº do pedido: {{ numeroPedido }}</strong></p>
+    <br />
+    <a routerLink="/home" class="btn-next" style="display:inline-block">Voltar ao início</a>
+  </div>
+</div>
